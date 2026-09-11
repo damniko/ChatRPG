@@ -1,0 +1,21 @@
+using ChatRPG.Application.Campaigns;
+using ChatRPG.Application.Gameplay;
+using ChatRPG.Domain.Combat;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace ChatRPG.Application;
+
+public static class DependencyInjection
+{
+    public static IServiceCollection AddApplication(this IServiceCollection services)
+    {
+        services.AddSingleton<IRandomSource, SystemRandomSource>();
+        services.AddSingleton<CombatResolver>();
+
+        services.AddScoped<IGameTurnService, GameTurnService>();
+        services.AddScoped<CreateCampaignHandler>();
+        services.AddScoped<DeleteCampaignHandler>();
+
+        return services;
+    }
+}

@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ChatRPG.Application\ChatRPG.Application.csproj" />
+      <ProjectReference Include="..\ChatRPG.Domain\ChatRPG.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="LangChain" Version="0.17.0" />
+      <PackageReference Include="LangChain.Databases.Postgres" Version="0.17.0" />
+      <PackageReference Include="LangChain.DocumentLoaders.Pdf" Version="0.17.0" />
+      <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.11" />
+      <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.11" />
+      <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.11" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <InternalsVisibleTo Include="ChatRPG.Agents.Tests" />
+      <!-- Moq builds its proxies in this assembly, so mocking the internal interfaces needs it too. -->
+      <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Prompts\**\*.md" />
+      <EmbeddedResource Include="Tools\Descriptions\**\*.md" />
+    </ItemGroup>
+
+</Project>
