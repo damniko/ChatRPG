@@ -35,7 +35,7 @@ public class Character : IEntity
     public bool IsPlayer { get; private set; }
     public string Name { get; private set; }
     public string Description { get; set; }
-    public byte[]? Portrait { get; init; }
+    public byte[]? Portrait { get; set; }
     public int MaxHealth { get; init; }
     public int CurrentHealth { get; private set; }
 

@@ -1,4 +1,5 @@
 using ChatRPG.Application.Campaigns;
+using ChatRPG.Application.Configuration;
 using ChatRPG.Application.Gameplay;
 using ChatRPG.Domain.Combat;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +10,10 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        services.AddOptions<ApplicationOptions>()
+            .BindConfiguration(ApplicationOptions.Section)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
         services.AddSingleton<IRandomSource, SystemRandomSource>();
         services.AddSingleton<CombatResolver>();
 

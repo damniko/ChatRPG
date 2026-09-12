@@ -1,6 +1,5 @@
 using ChatRPG.Agents.Prompts;
 using ChatRPG.Agents.Prompts.Catalogs;
-using ChatRPG.Agents.Tools;
 using ChatRPG.Agents.Tools.Catalogs;
 
 namespace ChatRPG.Agents.Tests.Prompts;

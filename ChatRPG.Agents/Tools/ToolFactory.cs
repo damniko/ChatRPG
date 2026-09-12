@@ -1,6 +1,5 @@
 using ChatRPG.Agents.Configuration;
 using ChatRPG.Agents.Llm;
-using ChatRPG.Agents.Prompts;
 using ChatRPG.Agents.Prompts.Catalogs;
 using ChatRPG.Agents.Tools.Catalogs;
 using ChatRPG.Agents.Tools.Helpers;
@@ -16,7 +15,7 @@ namespace ChatRPG.Agents.Tools;
 
 internal class ToolFactory(
     IToolDataTextParser parser,
-    IToolDataValidatorFactory validatorFactory,
+    IToolDataValidatorFactory validators,
     IToolDescriptionCatalog descriptions, 
     EdgeConsistencyValidator edgeConsistencyValidator,
     IOptions<AgentOptions> options,
@@ -28,28 +27,28 @@ internal class ToolFactory(
     IRandomSource randomSource) : IToolFactory
 {
     public AddEdgeTool GetAddEdgeTool(NarrativeGraph graph) => 
-        new(parser, graph, descriptions, validatorFactory.Create<ToolData.AddEdge>(), edgeConsistencyValidator);
+        new(parser, graph, descriptions, validators.Create<ToolData.AddEdge>(), edgeConsistencyValidator);
     
     public AddNodeTool GetAddNodeTool(NarrativeGraph graph) =>
-        new(parser, graph, descriptions, validatorFactory.Create<ToolData.AddNode>(), edgeConsistencyValidator);
+        new(parser, graph, descriptions, validators.Create<ToolData.AddNode>(), edgeConsistencyValidator);
 
     public AddEndNodeTool GetAddEndNodeTool(NarrativeGraph graph) 
-        => new(graph, descriptions);
+        => new(graph, descriptions, parser, validators.Create<ToolData.AddEndNode>());
 
     public UpdateCharacterTool GetUpdateCharacterTool(Campaign campaign) =>
-        new(parser, campaign, validatorFactory.Create<ToolData.Character>(), descriptions);
+        new(parser, campaign, validators.Create<ToolData.Character>(), descriptions);
 
     public UpdateEnvironmentTool GetUpdateEnvironmentTool(Campaign campaign) =>
-        new(campaign, descriptions, parser, validatorFactory.Create<ToolData.Environment>());
+        new(campaign, descriptions, parser, validators.Create<ToolData.Environment>());
     
     public SearchScenarioTool GetSearchScenarioTool(Campaign campaign) => 
-        new(campaign, GameSummaryFormatter.Format(campaign, options.Value.IncludePreviousMessages), documentStore, models, instructions, descriptions, parser, validatorFactory.Create<ToolData.SearchScenario>());
+        new(campaign, GameSummaryFormatter.Format(campaign, options.Value.IncludePreviousMessages), documentStore, models, instructions, descriptions, parser, validators.Create<ToolData.SearchScenario>());
     
     public UpdateGraphTool GetUpdateGraphTool(Campaign campaign, AdherenceVerdict verdict) =>
-        new(campaign, GameSummaryFormatter.Format(campaign, options.Value.IncludePreviousMessages), verdict, models, instructions, descriptions, parser, validatorFactory.Create<ToolData.UpdateGraph>());
+        new(campaign, GameSummaryFormatter.Format(campaign, options.Value.IncludePreviousMessages), verdict, models, instructions, descriptions, parser, validators.Create<ToolData.UpdateGraph>());
 
     public BattleTool GetBattleTool(Campaign campaign) =>
-        new(campaign, instructions, descriptions, parser, validatorFactory.Create<ToolData.Battle>(), characterFinder, randomSource, combatResolver);
+        new(campaign, instructions, descriptions, parser, validators.Create<ToolData.Battle>(), characterFinder, randomSource, combatResolver);
 
     public HealCharacterTool GetHealCharacterTool(Campaign campaign) =>
         new(campaign, descriptions, instructions, parser, characterFinder, combatResolver);

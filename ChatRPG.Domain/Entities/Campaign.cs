@@ -11,7 +11,7 @@ public class Campaign(User user, string title) : IEntity
     }
 
     public int Id { get; init; }
-    public string? StartScenario { get; init; }
+    public string? StartScenario { get; set; }
     public User User { get; private set; } = user;
     public string Title { get; private set; } = title;
     public DateTime StartedOn { get; private set; } = DateTime.UtcNow;
@@ -21,7 +21,7 @@ public class Campaign(User user, string title) : IEntity
     public ICollection<Environment> Environments { get; } = new List<Environment>();
     public Character Player => Characters.First(c => c.IsPlayer);
     public bool IsOpenWorld { get; init; }
-    public NarrativeGraph? NarrativeGraph { get; init; }
+    public NarrativeGraph? NarrativeGraph { get; set; }
     public bool GameOver { get; set; }
     public bool IsSnapshot { get; init; }
 }

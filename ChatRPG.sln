@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRPG.Agents", "ChatRPG.A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRPG.Agents.Tests", "ChatRPG.Agents.Tests\ChatRPG.Agents.Tests.csproj", "{91293641-71CB-4AFB-9F7C-B44B5CAFB05B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9546E029-817A-4C18-9B4B-1FA080433424}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -117,5 +119,8 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C295D6DB-9306-4076-BBE0-8768627A7388}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{91293641-71CB-4AFB-9F7C-B44B5CAFB05B} = {9546E029-817A-4C18-9B4B-1FA080433424}
 	EndGlobalSection
 EndGlobal
