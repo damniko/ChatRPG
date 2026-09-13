@@ -3,6 +3,7 @@ using LangChain.Providers;
 using LangChain.Providers.OpenAI;
 using LangChain.Providers.OpenAI.Predefined;
 using Microsoft.Extensions.Options;
+using tryAGI.OpenAI;
 
 namespace ChatRPG.Agents.Llm;
 
@@ -28,4 +29,6 @@ internal sealed class OpenAiChatModelFactory(
     }
 
     public IEmbeddingModel CreateEmbedding() => new TextEmbeddingV3SmallModel(_provider);
+
+    public ITextToImageModel CreateTextToImage() => new OpenAiTextToImageModel(_provider, CreateImageRequestModel.DallE3);
 }

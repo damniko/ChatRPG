@@ -17,4 +17,8 @@
     <ItemGroup>
       <ProjectReference Include="..\ChatRPG.Domain\ChatRPG.Domain.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Exceptions\" />
+    </ItemGroup>
 </Project>

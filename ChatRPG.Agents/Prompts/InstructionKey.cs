@@ -21,5 +21,6 @@ internal enum InstructionKey
     Scribe,
     CheckGraphUpdateConditions,
     GameOver,
-    Summarize
+    Summarize,
+    PortraitGeneration
 }

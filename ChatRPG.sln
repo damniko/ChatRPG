@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9546E029
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRPG.Visualization.Graphviz", "ChatRPG.Visualization.Graphviz\ChatRPG.Visualization.Graphviz.csproj", "{4EA5189D-E9C2-43C7-960C-700EBBD1F83D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "legacy", "legacy", "{70E5D17B-C46C-43D4-BB70-BB695E00ADFB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -136,5 +138,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{91293641-71CB-4AFB-9F7C-B44B5CAFB05B} = {9546E029-817A-4C18-9B4B-1FA080433424}
+		{02177064-5C6F-4AD0-A3E2-8FDE212D1B8E} = {70E5D17B-C46C-43D4-BB70-BB695E00ADFB}
+		{38AA38FA-5260-4499-8448-97F1D962035B} = {70E5D17B-C46C-43D4-BB70-BB695E00ADFB}
 	EndGlobalSection
 EndGlobal
