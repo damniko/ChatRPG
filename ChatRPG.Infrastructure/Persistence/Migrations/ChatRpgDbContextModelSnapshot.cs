@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace ChatRPG.Infrastructure.Migrations
+namespace ChatRPG.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ChatRpgDbContext))]
     partial class ChatRpgDbContextModelSnapshot : ModelSnapshot
@@ -164,9 +164,6 @@ namespace ChatRPG.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<int>("NarrativeGraphId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Revision")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
