@@ -70,6 +70,8 @@ internal class GraphvizNarrativeGraphRenderer : INarrativeGraphRenderer
             {
                 var source = root.GetNode(edge.SourceNodeId.ToString());
                 var target = root.GetNode(edge.TargetNodeId.ToString());
+                if (source is null || target is null)
+                    throw new MalformedGraphException(graph, edge, "Unknown source or target node");
 
                 var newEdge = root.GetOrAddEdge(source, target, edge.Id.ToString());
                 newEdge.SafeSetAttribute("label", string.Join(", ", edge.Conditions), "");

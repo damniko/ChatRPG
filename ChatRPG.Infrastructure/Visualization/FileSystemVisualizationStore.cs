@@ -20,4 +20,10 @@ public class FileSystemVisualizationStore(IOptions<InfrastructureOptions> option
         Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
         await File.WriteAllBytesAsync(fullPath, content, ct);
     }
+
+    public Task DeleteAsync(string location, CancellationToken ct = default)
+    {
+        File.Delete(FullPath(location));
+        return Task.CompletedTask;
+    }
 }

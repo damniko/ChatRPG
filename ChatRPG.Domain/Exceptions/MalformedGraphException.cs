@@ -2,7 +2,7 @@ using ChatRPG.Domain.Entities;
 
 namespace ChatRPG.Domain.Exceptions;
 
-public sealed class MalformedGraphException : ApplicationException
+public sealed class MalformedGraphException : DomainException
 {
     public NarrativeGraph Graph { get; }
     public NarrativeNode? Node { get; }
