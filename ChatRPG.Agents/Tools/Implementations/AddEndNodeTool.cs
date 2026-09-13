@@ -1,3 +1,4 @@
+using ChatRPG.Agents.Llm;
 using ChatRPG.Agents.Tools.Catalogs;
 using ChatRPG.Agents.Tools.Parsing;
 using ChatRPG.Agents.Tools.Validators;
@@ -34,7 +35,7 @@ internal sealed class AddEndNodeTool(
         }
         
         var targetNode = graph.Nodes.FirstOrDefault(n => n.Name == "End");
-        if (targetNode != null && sourceNode!.Edges.Any(e => e.TargetNodeName == targetNode.Name))
+        if (targetNode != null && sourceNode!.Edges.Any(e => e.TargetNode.Name == targetNode.Name))
         {
             return Task.FromResult($"Failed to add edge to end node: An edge already exists between {sourceNode.Name} and {targetNode.Name}.");
         }
@@ -51,6 +52,6 @@ internal sealed class AddEndNodeTool(
         }
         
         sourceNode.Edges.Add(new NarrativeEdge(addEndNode.Conditions, sourceNode, targetNode));
-        return Task.FromResult($"The graph has been updated. From now on, use the updated graph:\n{graph.Serialize()}");
+        return Task.FromResult($"The graph has been updated. From now on, use the updated graph:\n{NarrativeGraphFormatter.Format(graph)}");
     }
 }

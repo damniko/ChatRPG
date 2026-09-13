@@ -30,7 +30,7 @@ internal sealed class ReActNavigatorAgent(
         {
             Variables =
             {
-                ["graph"] = campaign.NarrativeGraph?.Serialize() ?? string.Empty,
+                ["graph"] = campaign.NarrativeGraph is { } g ? NarrativeGraphFormatter.Format(g) : string.Empty,
                 ["gameSummary"] = gameSummary
             },
             Tools =

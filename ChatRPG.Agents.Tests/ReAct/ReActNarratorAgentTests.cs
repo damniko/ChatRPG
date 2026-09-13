@@ -1,4 +1,5 @@
 using ChatRPG.Agents.Configuration;
+using ChatRPG.Agents.Llm;
 using ChatRPG.Agents.Prompts;
 using ChatRPG.Application.Gameplay;
 using ChatRPG.Domain.Entities;
@@ -46,7 +47,7 @@ public class ReActNarratorAgentTests
         string prompt = fixture.FirstPrompt();
 
         Assert.StartsWith("SCENARIO", prompt);
-        Assert.Contains(graph.Serialize(), prompt);
+        Assert.Contains(NarrativeGraphFormatter.Format(graph), prompt);
         Assert.Contains("searchscenariotool", prompt);
     }
 

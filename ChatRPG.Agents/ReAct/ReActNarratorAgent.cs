@@ -78,7 +78,7 @@ internal sealed class ReActNarratorAgent(
         var graph = campaign.NarrativeGraph ?? throw new InvalidOperationException(
             "A campaign that is not open world must have a narrative graph to narrate from.");
 
-        agent.Variables["graph"] = graph.Serialize();
+        agent.Variables["graph"] = NarrativeGraphFormatter.Format(graph);
         agent.Tools.Add(tools.GetSearchScenarioTool(campaign));
 
         return agent;

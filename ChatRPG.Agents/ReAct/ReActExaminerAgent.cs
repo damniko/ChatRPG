@@ -36,7 +36,7 @@ internal sealed class ReActExaminerAgent(
         {
             Variables =
             {
-                ["graph"] = graph.Serialize(),
+                ["graph"] = NarrativeGraphFormatter.Format(graph),
                 ["gameSummary"] = gameSummary,
             },
             Tools =

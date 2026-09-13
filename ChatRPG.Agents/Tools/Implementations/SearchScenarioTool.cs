@@ -54,7 +54,7 @@ internal sealed class SearchScenarioTool(
             {
                 ["gameSummary"] = gameSummary,
                 // TODO: Normalize variable usages in templates (e.g., with/without headers?)
-                ["graph"] = $"Scenario Graph:\n{campaign.NarrativeGraph!.Serialize()}\n",
+                ["graph"] = $"Scenario Graph:\n{NarrativeGraphFormatter.Format(campaign.NarrativeGraph!)}\n",
                 ["context"] = await GatherContextAsync(search.Query!, node, ct),
                 ["input"] = input,
             });

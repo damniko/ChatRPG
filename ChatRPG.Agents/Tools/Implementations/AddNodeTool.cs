@@ -1,3 +1,4 @@
+using ChatRPG.Agents.Llm;
 using ChatRPG.Agents.Tools.Catalogs;
 using ChatRPG.Agents.Tools.Parsing;
 using ChatRPG.Agents.Tools.Validators;
@@ -64,6 +65,6 @@ internal sealed class AddNodeTool(
         edgesToAdd.ForEach(edge => edge.SourceNode.Edges.Add(edge));
 
         return Task.FromResult(
-            $"The graph has been updated. Examine the graph to determine if additional edges should be added based on the newly added node. From now on, use the updated graph:\n{graph.Serialize()}");
+            $"The graph has been updated. Examine the graph to determine if additional edges should be added based on the newly added node. From now on, use the updated graph:\n{NarrativeGraphFormatter.Format(graph)}");
     }
 }

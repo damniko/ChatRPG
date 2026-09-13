@@ -1,21 +1,15 @@
 ﻿using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using ChatRPG.Domain.Entities.Abstractions;
 
 namespace ChatRPG.Domain.Entities;
 
 public class NarrativeGraph : IEntity
 {
-    private readonly JsonSerializerOptions _jsonSerializerOptions = new() { WriteIndented = true };
-
-    [JsonIgnore]
-    public ICollection<GraphVisualization> Visualizations { get; init; } = [];
-    
-    [JsonIgnore]
     public int Id { get; init; }
 
-    [JsonIgnore] public ICollection<Campaign> Campaigns { get; private set; } = [];
+    public ICollection<GraphVisualization> Visualizations { get; init; } = [];
+    
+    public ICollection<Campaign> Campaigns { get; private set; } = [];
 
     public HashSet<NarrativeNode> Nodes { get; private set; } = [];
 
@@ -46,7 +40,7 @@ public class NarrativeGraph : IEntity
 
     public List<NarrativeNode> GetNodesWithStatus(NarrativeNode.Status status)
     {
-        return Nodes.Where(n => n.NodeStatus == status).ToList();
+        return [.. Nodes.Where(n => n.NodeStatus == status)];
     }
 
     public NarrativeNode InitializeStartNode()
@@ -59,23 +53,11 @@ public class NarrativeGraph : IEntity
         return startNode;
     }
 
-    public string Serialize()
-    {
-        return JsonSerializer.Serialize(this, _jsonSerializerOptions);
-    }
-
-    public void PrintGraph()
-    {
-        Console.WriteLine(this);
-    }
-
     public override string ToString()
     {
         var startNode = GetStartNode();
         if (startNode == null)
-        {
-            return "Warning: No start node found. Create a node with no incoming edges.";
-        }
+            return string.Empty;
 
         var sb = new StringBuilder();
         sb.AppendLine($"Start Node: {startNode}\n");

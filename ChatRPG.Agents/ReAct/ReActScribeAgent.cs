@@ -39,7 +39,7 @@ internal sealed class ReActScribeAgent(
             {
                 Variables =
                 {
-                    ["graph"] = graph.Serialize(),
+                    ["graph"] = NarrativeGraphFormatter.Format(graph),
                     ["graphExtensionSummary"] = prevGraphSummary
                 },
                 Tools =

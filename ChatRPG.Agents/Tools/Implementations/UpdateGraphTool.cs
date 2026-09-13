@@ -67,7 +67,7 @@ internal sealed class UpdateGraphTool(
             ? NarrativeNode.Status.Completed
             : NarrativeNode.Status.Ongoing;
         
-        return $"Graph updated successfully: Source node '{srcNodeSearch.Value.Name}' is completed, and target node '{targetNodeSearch.Value.Name}' is {targetNodeSearch.Value!.NodeStatusCategory}. Updated graph:\n{campaign.NarrativeGraph!.Serialize()}";
+        return $"Graph updated successfully: Source node '{srcNodeSearch.Value.Name}' is completed, and target node '{targetNodeSearch.Value.Name}' is {targetNodeSearch.Value!.NodeStatus}. Updated graph:\n{NarrativeGraphFormatter.Format(campaign.NarrativeGraph!)}";
     }
 
     private Result<NarrativeNode> SearchSourceNode(string sourceNodeName, string targetNodeName)
@@ -115,8 +115,8 @@ internal sealed class UpdateGraphTool(
                 {
                     ["gameSummary"] = gameSummary,
                     ["verdict"] = verdict.ToPromptString(),
-                    ["graph"] = campaign.NarrativeGraph!.Serialize(),
-                    ["edge"] = edge.Serialize(),
+                    ["graph"] = NarrativeGraphFormatter.Format(campaign.NarrativeGraph!),
+                    ["edge"] = NarrativeGraphFormatter.Format(edge),
                     ["attempts"] = previousAttempts.ToString()
                 });
 
