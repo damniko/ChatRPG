@@ -1,7 +1,7 @@
 using ChatRPG.Agents.Tools.Parsing;
 using ChatRPG.Agents.Tools.Validators;
 
-namespace ChatRPG.Agents.Tests.Tools;
+namespace ChatRPG.Agents.Tests.Tools.Validators;
 
 public class ToolDataValidatorFactoryTests
 {
