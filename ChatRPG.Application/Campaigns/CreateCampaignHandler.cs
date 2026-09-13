@@ -50,8 +50,11 @@ public sealed class CreateCampaignHandler(
 
         if (options.Value.EnableGraphVisualization)
         {
-            graphVisualizer.Visualize(campaign.NarrativeGraph);
+            var visualization = await graphVisualizer.GenerateAndSaveAsync(campaign.NarrativeGraph, ct);
+            campaign.NarrativeGraph.Visualizations.Add(visualization);
+            await unitOfWork.SaveChangesAsync(ct);
         }
+
         return campaign;
     }
 }

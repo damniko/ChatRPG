@@ -11,6 +11,7 @@ public class ChatRpgDbContext(DbContextOptions<ChatRpgDbContext> options) : Iden
 {
     public DbSet<User> DomainUsers => Set<User>();
     public DbSet<Campaign> Campaigns => Set<Campaign>();
+    public DbSet<GraphVisualization> GraphVisualizations => Set<GraphVisualization>();
     public DbSet<Environment> Environments => Set<Environment>();
     public DbSet<Message> Messages => Set<Message>();
     public DbSet<Character> Characters => Set<Character>();

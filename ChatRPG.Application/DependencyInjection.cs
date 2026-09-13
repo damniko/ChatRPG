@@ -1,3 +1,4 @@
+using ChatRPG.Application.Abstractions;
 using ChatRPG.Application.Campaigns;
 using ChatRPG.Application.Configuration;
 using ChatRPG.Application.Gameplay;
@@ -20,6 +21,7 @@ public static class DependencyInjection
         services.AddScoped<IGameTurnService, GameTurnService>();
         services.AddScoped<CreateCampaignHandler>();
         services.AddScoped<DeleteCampaignHandler>();
+        services.AddScoped<INarrativeGraphVisualizer, INarrativeGraphVisualizer>();
 
         return services;
     }

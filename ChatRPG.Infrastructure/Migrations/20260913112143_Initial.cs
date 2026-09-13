@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace ChatRPG.Infrastructure.Persistence.Migrations
+namespace ChatRPG.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class Initial : Migration
@@ -193,6 +193,29 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                         name: "FK_AspNetUserTokens_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GraphVisualizations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    NarrativeGraphId = table.Column<int>(type: "integer", nullable: false),
+                    Location = table.Column<string>(type: "text", nullable: false),
+                    Format = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Revision = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GraphVisualizations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_GraphVisualizations_NarrativeGraphs_NarrativeGraphId",
+                        column: x => x.NarrativeGraphId,
+                        principalTable: "NarrativeGraphs",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -456,6 +479,11 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                 column: "CampaignId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_GraphVisualizations_NarrativeGraphId",
+                table: "GraphVisualizations",
+                column: "NarrativeGraphId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Messages_CampaignId",
                 table: "Messages",
                 column: "CampaignId");
@@ -513,6 +541,9 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "Characters");
+
+            migrationBuilder.DropTable(
+                name: "GraphVisualizations");
 
             migrationBuilder.DropTable(
                 name: "Messages");

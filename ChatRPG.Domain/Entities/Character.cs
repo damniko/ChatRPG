@@ -5,6 +5,7 @@ namespace ChatRPG.Domain.Entities;
 
 public class Character : IEntity
 {
+    private Character() {}
     public Character(Campaign campaign, Environment environment, CharacterType type, string name, string description,
         bool isPlayer)
     {

@@ -10,6 +10,9 @@ public class NarrativeGraph : IEntity
     private readonly JsonSerializerOptions _jsonSerializerOptions = new() { WriteIndented = true };
 
     [JsonIgnore]
+    public ICollection<GraphVisualization> Visualizations { get; init; } = [];
+    
+    [JsonIgnore]
     public int Id { get; init; }
 
     [JsonIgnore] public ICollection<Campaign> Campaigns { get; private set; } = [];
