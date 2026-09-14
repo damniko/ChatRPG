@@ -22,6 +22,9 @@ internal sealed class ReActArchivistAgent(
     private const double NarrativeChangesTemperature = 0.7;
     private const double SummaryTemperature = 0.4;
 
+    /// <summary>Labels the summary separately, since it is a second call with its own cost.</summary>
+    private const string SummaryOperation = $"{nameof(ReActArchivistAgent)}.Summary";
+
     public async Task ApplyNarrativeChangesAsync(
         Campaign campaign,
         string playerInput,
@@ -63,7 +66,7 @@ internal sealed class ReActArchivistAgent(
     {
         if (options.Value.SummarizeArchivistMessages)
         {
-            var summaryModel = models.CreateChat(SummaryTemperature);
+            var summaryModel = models.CreateChat(SummaryTemperature, SummaryOperation);
             var messages = new List<LangChain.Providers.Message>
             {
                 new(playerInput, MessageRole.Human),

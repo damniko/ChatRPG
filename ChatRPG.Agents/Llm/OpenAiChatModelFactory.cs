@@ -1,4 +1,5 @@
 using ChatRPG.Agents.Configuration;
+using ChatRPG.Application.Abstractions;
 using LangChain.Providers;
 using LangChain.Providers.OpenAI;
 using LangChain.Providers.OpenAI.Predefined;
@@ -8,14 +9,19 @@ using tryAGI.OpenAI;
 namespace ChatRPG.Agents.Llm;
 
 internal sealed class OpenAiChatModelFactory(
+    OpenAiProviderHolder providers,
     IOptions<AgentOptions> agentOptions,
-    IOptions<LanguageModelOptions> llmOptions) : IChatModelFactory
+    ILlmUsageSink usageSink,
+    TimeProvider clock) : IChatModelFactory
 {
-    private readonly OpenAiProvider _provider = new(llmOptions.Value.ApiKey);
+    /// <summary>Stands in for the caller when one did not identify itself.</summary>
+    private const string UnattributedOperation = "Unattributed";
 
-    public IChatModel CreateChat(double temperature, string? agent = null, bool streaming = false)
+    private OpenAiProvider Provider => providers.Provider;
+
+    public IChatModel CreateChat(double temperature, string? operation = null, bool streaming = false)
     {
-        var model = new Gpt4OmniModel(_provider)
+        var model = new Gpt4OmniModel(Provider)
         {
             Settings = new OpenAiChatSettings
             {
@@ -23,12 +29,18 @@ internal sealed class OpenAiChatModelFactory(
                 Temperature = temperature
             }
         };
-        return agent != null && agentOptions.Value.DebugAgents.Contains(agent)
+
+        IChatModel chat = operation != null && agentOptions.Value.DebugAgents.Contains(operation)
             ? model.UseConsoleForDebug()
             : model;
+
+        // Outside the debug decorator, so debug output is unaffected by tracking.
+        return new UsageTrackingChatModel(
+            chat, operation ?? UnattributedOperation, usageSink, clock);
     }
 
-    public IEmbeddingModel CreateEmbedding() => new TextEmbeddingV3SmallModel(_provider);
+    public IEmbeddingModel CreateEmbedding() => new TextEmbeddingV3SmallModel(Provider);
 
-    public ITextToImageModel CreateTextToImage() => new OpenAiTextToImageModel(_provider, CreateImageRequestModel.DallE3);
+    public ITextToImageModel CreateTextToImage() =>
+        new OpenAiTextToImageModel(Provider, CreateImageRequestModel.DallE3);
 }

@@ -23,7 +23,7 @@ internal sealed class CharacterFinder(
 
     public async Task<Character?> FindAsync(Campaign campaign, string input, string instruction, CancellationToken ct = default)
     {
-        var model = models.CreateChat(Temperature);
+        var model = models.CreateChat(Temperature, nameof(CharacterFinder));
         var query = new StringBuilder(instructions.Get(InstructionKey.FindCharacter));
         
         AppendSummary(campaign, ref query);

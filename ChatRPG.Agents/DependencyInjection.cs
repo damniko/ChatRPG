@@ -33,7 +33,10 @@ public static class DependencyInjection
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        services.AddSingleton<IChatModelFactory, OpenAiChatModelFactory>();
+        services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<OpenAiProviderHolder>();
+
+        services.AddScoped<IChatModelFactory, OpenAiChatModelFactory>();
         services.AddSingleton<IInstructionCatalog, EmbeddedInstructionCatalog>();
         services.AddSingleton<IToolDescriptionCatalog, EmbeddedToolDescriptionCatalog>();
         services.AddSingleton<IToolDataTextParser, ToolDataTextParser>();

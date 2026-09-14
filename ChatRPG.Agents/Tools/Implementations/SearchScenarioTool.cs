@@ -59,7 +59,7 @@ internal sealed class SearchScenarioTool(
                 ["input"] = input,
             });
 
-        var response = await models.CreateChat(DistillationTemperature)
+        var response = await models.CreateChat(DistillationTemperature, nameof(SearchScenarioTool))
             .GenerateAsync(ChatRequest.ToChatRequest(prompt), settings: null, ct);
 
         return response.LastMessageContent;
