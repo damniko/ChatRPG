@@ -10,7 +10,7 @@ internal class ToolDataValidatorFactory : IToolDataValidatorFactory
         () => new Dictionary<Type, Func<object>> 
         {
             { typeof(ToolData.Character), () => new CharacterValidator() },
-            { typeof(ToolData.Environment), () => new EnvironmentValidator() },
+            { typeof(ToolData.Location), () => new LocationValidator() },
             { typeof(ToolData.UpdateGraph), () => new UpdateGraphValidator() },
             { typeof(ToolData.SearchScenario), () => new SearchScenarioValidator() },
             { typeof(ToolData.AddEdge), () => new AddEdgeValidator() },

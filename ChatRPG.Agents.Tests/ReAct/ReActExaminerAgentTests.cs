@@ -1,27 +1,36 @@
 using ChatRPG.Agents.ReAct;
+using ChatRPG.Domain.Entities;
 
 namespace ChatRPG.Agents.Tests.ReAct;
 
 public class ReActExaminerAgentTests
 {
     [Theory]
-    [InlineData("Verdict: ALLOWED", true)]
-    [InlineData("Verdict: CONDITIONALLY ALLOWED", true)]
-    [InlineData("Verdict: DISALLOWED", false)]
-    public void ParseVerdict_ReadsWhetherThePlayerMayAct(string verdict, bool expectedIsAllowed)
+    [InlineData("Ruling: ALLOWED", ActionPermission.Allowed)]
+    [InlineData("Ruling: CONDITIONAL", ActionPermission.Conditional)]
+    [InlineData("Ruling: DISALLOWED", ActionPermission.Disallowed)]
+    public void ParseRuling_ReadsWhetherThePlayerMayAct(string ruling, ActionPermission expected)
     {
-        var parsed = ReActExaminerAgent.ParseVerdict($"{verdict}\nThe gate is locked.");
+        var parsed = ReActExaminerAgent.ParseRuling($"{ruling}\nThe gate is locked.");
 
-        Assert.Equal(expectedIsAllowed, parsed.IsAllowed);
+        Assert.Equal(expected, parsed.Permission);
     }
 
     [Fact]
-    public void ParseVerdict_KeepsOnlyTheReasoning()
+    public void ParseRuling_ModelWroteTheOldConditionallyAllowedWording_IsStillConditional()
     {
-        // The narrator renders this as "Denied (reasoning: ...)", so the verdict line must not repeat.
-        var parsed = ReActExaminerAgent.ParseVerdict(
+        var parsed = ReActExaminerAgent.ParseRuling("Ruling: CONDITIONALLY ALLOWED\nThe rope is frayed.");
+
+        Assert.Equal(ActionPermission.Conditional, parsed.Permission);
+        Assert.Equal("The rope is frayed.", parsed.Reasoning);
+    }
+
+    [Fact]
+    public void ParseRuling_KeepsOnlyTheReasoning()
+    {
+        var parsed = ReActExaminerAgent.ParseRuling(
             """
-            Verdict: DISALLOWED
+            Ruling: DISALLOWED
             The Ornate Crypt Key is still in the reliquary, so the door will not open.
             """);
 
@@ -29,10 +38,43 @@ public class ReActExaminerAgentTests
     }
 
     [Fact]
-    public void ParseVerdict_VerdictAndReasoningOnOneLine_KeepsTheWholeAnswer()
+    public void ParseRuling_ReasoningMentionsDisallowed_DoesNotFlipThePermission()
     {
-        var parsed = ReActExaminerAgent.ParseVerdict("Verdict: ALLOWED - the door is already unlocked.");
+        var parsed = ReActExaminerAgent.ParseRuling(
+            """
+            Ruling: ALLOWED
+            Entering the vault would be disallowed, but the antechamber is open to anyone.
+            """);
 
-        Assert.Equal("Verdict: ALLOWED - the door is already unlocked.", parsed.Reasoning);
+        Assert.Equal(ActionPermission.Allowed, parsed.Permission);
+    }
+
+    [Fact]
+    public void ParseRuling_RulingAndReasoningOnOneLine_SplitsThemAnyway()
+    {
+        var parsed = ReActExaminerAgent.ParseRuling("Ruling: ALLOWED - the door is already unlocked.");
+
+        Assert.Equal(ActionPermission.Allowed, parsed.Permission);
+        Assert.Equal("the door is already unlocked.", parsed.Reasoning);
+    }
+
+    [Fact]
+    public void ParseRuling_NoMarker_AllowsAndKeepsTheWholeAnswerAsReasoning()
+    {
+        var parsed = ReActExaminerAgent.ParseRuling("The door is already unlocked.");
+
+        Assert.Equal(ActionPermission.Allowed, parsed.Permission);
+        Assert.Equal("The door is already unlocked.", parsed.Reasoning);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("Ruling: ALLOWED")]
+    public void ParseRuling_NoReasoning_StillProducesReasoning(string answer)
+    {
+        var parsed = ReActExaminerAgent.ParseRuling(answer);
+
+        Assert.False(string.IsNullOrWhiteSpace(parsed.Reasoning));
     }
 }

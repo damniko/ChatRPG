@@ -16,6 +16,7 @@ namespace ChatRPG.Agents.ReAct;
 /// </summary>
 internal sealed class ReActNarratorAgent(
     IChatModelFactory models,
+    GameSummaryFormatter summaryFormatter,
     IInstructionCatalog instructions,
     IToolFactory tools,
     IOptions<AgentOptions> options) : INarrator
@@ -29,14 +30,24 @@ internal sealed class ReActNarratorAgent(
             return AsSingleChunkAsync(request, ct);
         }
 
-        return CreateAgent(request, streaming: true)
-            .RunStreamingAsync(NarrationInputFormatter.Format(request), ct);
+        return StreamAsync(request, ct);
     }
 
-    public Task<string> NarrateAsync(NarrationRequest request, CancellationToken ct = default)
+    private async IAsyncEnumerable<string> StreamAsync(
+        NarrationRequest request, [EnumeratorCancellation] CancellationToken ct)
     {
-        return CreateAgent(request, streaming: false)
-            .RunAsync(NarrationInputFormatter.Format(request), ct);
+        var agent = await CreateAgentAsync(request, streaming: true, ct);
+
+        await foreach (string chunk in agent.RunStreamingAsync(NarrationInputFormatter.Format(request), ct))
+        {
+            yield return chunk;
+        }
+    }
+
+    public async Task<string> NarrateAsync(NarrationRequest request, CancellationToken ct = default)
+    {
+        var agent = await CreateAgentAsync(request, streaming: false, ct);
+        return await agent.RunAsync(NarrationInputFormatter.Format(request), ct);
     }
 
     private async IAsyncEnumerable<string> AsSingleChunkAsync(NarrationRequest request, [EnumeratorCancellation] CancellationToken ct)
@@ -48,7 +59,7 @@ internal sealed class ReActNarratorAgent(
     /// Builds the narrator for one request. Which prompt it speaks from, what it is told to do, and what
     /// it may reach for all depend on whether the campaign follows a scenario or is open world.
     /// </summary>
-    private ReActAgent CreateAgent(NarrationRequest request, bool streaming)
+    private async Task<ReActAgent> CreateAgentAsync(NarrationRequest request, bool streaming, CancellationToken ct)
     {
         var campaign = request.Campaign;
 
@@ -58,7 +69,7 @@ internal sealed class ReActNarratorAgent(
         {
             Variables =
             {
-                ["gameSummary"] = GameSummaryFormatter.Format(campaign, options.Value.IncludePreviousMessages),
+                ["gameSummary"] = await summaryFormatter.FormatAsync(campaign.Id, campaign.GameSummary, ct),
                 ["action"] = instructions.Get(NarrationPrompts.InstructionFor(request)),
             },
             Tools =
@@ -79,7 +90,7 @@ internal sealed class ReActNarratorAgent(
             "A campaign that is not open world must have a narrative graph to narrate from.");
 
         agent.Variables["graph"] = NarrativeGraphFormatter.Format(graph);
-        agent.Tools.Add(tools.GetSearchScenarioTool(campaign));
+        agent.Tools.Add(tools.GetSearchScenarioTool(campaign, agent.Variables["gameSummary"]));
 
         return agent;
     }

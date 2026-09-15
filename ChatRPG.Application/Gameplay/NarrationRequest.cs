@@ -1,4 +1,3 @@
-using ChatRPG.Application.Abstractions;
 using ChatRPG.Domain.Entities;
 
 namespace ChatRPG.Application.Gameplay;
@@ -9,11 +8,11 @@ public abstract record NarrationRequest(Campaign Campaign)
     public sealed record Opening(Campaign Campaign, string Scenario, string? GraphSummary = null)
         : NarrationRequest(Campaign);
 
-    /// <summary>The player acted. <paramref name="Verdict" /> is null for open-world campaigns.</summary>
+    /// <summary>The player acted. <paramref name="Ruling" /> is null for open-world campaigns.</summary>
     public sealed record PlayerTurn(
         Campaign Campaign,
         PlayerAction Action,
-        AdherenceVerdict? Verdict = null,
+        ActionRuling? Ruling = null,
         string? GraphSummary = null) : NarrationRequest(Campaign);
 
     /// <summary>

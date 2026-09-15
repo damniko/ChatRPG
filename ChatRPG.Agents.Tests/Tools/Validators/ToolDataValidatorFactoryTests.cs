@@ -12,7 +12,7 @@ public class ToolDataValidatorFactoryTests
 
         Assert.IsType<BattleValidator>(factory.Create<ToolData.Battle>());
         Assert.IsType<CharacterValidator>(factory.Create<ToolData.Character>());
-        Assert.IsType<EnvironmentValidator>(factory.Create<ToolData.Environment>());
+        Assert.IsType<LocationValidator>(factory.Create<ToolData.Location>());
         Assert.IsType<SearchScenarioValidator>(factory.Create<ToolData.SearchScenario>());
         Assert.IsType<UpdateGraphValidator>(factory.Create<ToolData.UpdateGraph>());
         Assert.IsType<AddNodeValidator>(factory.Create<ToolData.AddNode>());

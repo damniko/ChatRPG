@@ -5,10 +5,10 @@ using ChatRPG.Agents.Llm;
 using ChatRPG.Agents.Prompts;
 using ChatRPG.Agents.Prompts.Catalogs;
 using ChatRPG.Agents.Tools.Parsing;
+using ChatRPG.Application.Mapping;
 using ChatRPG.Domain.Entities;
 using LangChain.Providers;
 using Microsoft.Extensions.Options;
-using MessageRole = ChatRPG.Domain.Enums.MessageRole;
 
 namespace ChatRPG.Agents.Tools.Helpers;
 
@@ -59,22 +59,11 @@ internal sealed class CharacterFinder(
             "\n\nUse these previous messages as context. They only serve to give a hint of the current scenario:");
             
         var messages = campaign.Messages
-            .Where(m => m.Role != MessageRole.System)
             .OrderBy(m => m.Timestamp)
-            .TakeLast(options.Value.PreviousMessagesCount);
-        foreach (var message in messages)
-        {
-            if (message.Role == MessageRole.User)
-            {
-                query.Append($"\nPlayer: {message.Content}");
-                if (message.Verdict != null)
-                    query.Append($"\nAdherence verdict: {message.Verdict.Content}");
-            }
-            else
-            {
-                query.AppendLine($"\nGM: {message.Content}");
-            }
-        }
+            .TakeLast(options.Value.PreviousMessagesCount)
+            .Select(m => m.ToView());
+
+        MessageTranscript.Append(query, messages);
     }
 
     private static void AppendCharacters(Campaign campaign, ref StringBuilder query)

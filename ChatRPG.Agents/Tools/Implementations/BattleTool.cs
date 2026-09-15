@@ -62,7 +62,7 @@ internal sealed class BattleTool(
         var character = await characterFinder.FindAsync(campaign, json,  instructions.Get(InstructionKey.Battle), ct);
         
         // Create dummy characters if they do not exist and pray that the archive chain will update them
-        character ??= new Character(campaign, campaign.Player.Environment, CharacterType.Humanoid, participant.Name!, participant.Description!, false);
+        character ??= new Character(campaign, campaign.Player.Location, CharacterType.Humanoid, participant.Name!, participant.Description!, false);
 
         return character;
     }

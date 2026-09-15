@@ -2,13 +2,11 @@ using ChatRPG.Domain.Entities.Abstractions;
 
 namespace ChatRPG.Domain.Entities;
 
-public class Environment : IEntity
+public class Location : IEntity
 {
-    private Environment()
-    {
-    }
+    private Location() { }
 
-    public Environment(Campaign campaign, string name, string description)
+    public Location(Campaign campaign, string name, string description)
     {
         Campaign = campaign;
         Name = name;

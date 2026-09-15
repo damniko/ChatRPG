@@ -1,27 +1,20 @@
 using ChatRPG.Domain.Entities.Abstractions;
-using ChatRPG.Domain.Enums;
 
 namespace ChatRPG.Domain.Entities;
 
-public class Message : IEntity
+public abstract class Message : IEntity
 {
-    private Message()
-    {
-    }
+    protected Message() { }
 
-    public Message(Campaign campaign, MessageRole role, string content, Verdict? verdict = null)
+    protected Message(Campaign campaign, string content)
     {
         Campaign = campaign;
-        Role = role;
         Content = content;
         Timestamp = DateTime.UtcNow;
-        Verdict = verdict;
     }
 
     public int Id { get; init; }
-    public Campaign Campaign { get; private set; } = null!;
-    public MessageRole Role { get; private set; } = MessageRole.User;
-    public string Content { get; private set; } = null!;
-    public DateTime Timestamp { get; private set; }
-    public Verdict? Verdict { get; private set; }
+    public required Campaign Campaign { get; init; }
+    public required string Content { get; init; }
+    public DateTime Timestamp { get; init; }
 }

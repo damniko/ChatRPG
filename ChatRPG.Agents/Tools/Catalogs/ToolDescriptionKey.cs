@@ -5,7 +5,7 @@ internal enum ToolDescriptionKey
     SearchScenario,
     UpdateCharacter,
     UpdateGraph,
-    UpdateEnvironment,
+    UpdateLocation,
     AddNode,
     AddEdge,
     AddEndNode,

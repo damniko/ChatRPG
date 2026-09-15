@@ -6,11 +6,11 @@ namespace ChatRPG.Domain.Entities;
 public class Character : IEntity
 {
     private Character() {}
-    public Character(Campaign campaign, Environment environment, CharacterType type, string name, string description,
+    public Character(Campaign campaign, Location location, CharacterType type, string name, string description,
         bool isPlayer)
     {
         Campaign = campaign;
-        Environment = environment;
+        Location = location;
         Type = type;
         Name = name;
         Description = description;
@@ -31,7 +31,7 @@ public class Character : IEntity
 
     public int Id { get; init; }
     public Campaign Campaign { get; private set; }
-    public Environment Environment { get; set; }
+    public Location Location { get; set; }
     public CharacterType Type { get; private set; }
     public bool IsPlayer { get; private set; }
     public string Name { get; private set; }

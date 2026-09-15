@@ -11,8 +11,7 @@ public class CampaignRepository(ChatRpgDbContext dbContext) : ICampaignRepositor
         var campaign = await dbContext.Campaigns
             .Where(campaign => campaign.Id == campaignId)
             .Include(campaign => campaign.Messages)
-            .ThenInclude(message => message.Verdict)
-            .Include(campaign => campaign.Environments)
+            .Include(campaign => campaign.Locations)
             .Include(campaign => campaign.Characters)
             .Include(campaign => campaign.NarrativeGraph)
             .AsSplitQuery()

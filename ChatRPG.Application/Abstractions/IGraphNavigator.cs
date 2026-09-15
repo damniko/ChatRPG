@@ -7,6 +7,6 @@ public interface IGraphNavigator
     Task<string> ReviewGraphAsync(
         Campaign campaign,
         string playerInput,
-        AdherenceVerdict verdict,
+        ActionRuling ruling,
         CancellationToken ct = default);
 }

@@ -44,7 +44,7 @@ public static class DependencyInjection
         services.AddScoped<IToolFactory, ToolFactory>();
 
         services.AddScoped<INarrator, ReActNarratorAgent>();
-        services.AddScoped<IInputExaminer, ReActExaminerAgent>();
+        services.AddScoped<IActionExaminer, ReActExaminerAgent>();
         services.AddScoped<IGraphNavigator, ReActNavigatorAgent>();
         services.AddScoped<IArchivist, ReActArchivistAgent>();
         services.AddScoped<INarrativeGraphScribe, ReActScribeAgent>();

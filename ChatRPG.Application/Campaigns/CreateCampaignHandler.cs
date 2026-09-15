@@ -3,7 +3,6 @@ using ChatRPG.Application.Configuration;
 using ChatRPG.Domain.Entities;
 using ChatRPG.Domain.Enums;
 using Microsoft.Extensions.Options;
-using Environment = ChatRPG.Domain.Entities.Environment;
 
 namespace ChatRPG.Application.Campaigns;
 
@@ -20,9 +19,9 @@ public sealed class CreateCampaignHandler(
     public async Task<Campaign> HandleAsync(User user, string title, string startScenario, bool isOpenWorld, string characterName, string characterDescription, byte[]? scenarioDocument = null, CancellationToken ct = default)
     {
         var campaign = new Campaign(user, title, startScenario, isOpenWorld);
-        var environment = new Environment(campaign, "Start location", "The place where it all began");
-        var player = new Character(campaign, environment, CharacterType.Humanoid, characterName, characterDescription, true);
-        campaign.Environments.Add(environment);
+        var location = new Location(campaign, "Start location", "The place where it all began");
+        var player = new Character(campaign, location, CharacterType.Humanoid, characterName, characterDescription, true);
+        campaign.Locations.Add(location);
         campaign.Characters.Add(player);
         campaigns.Add(campaign);
         await unitOfWork.SaveChangesAsync(ct);

@@ -15,6 +15,7 @@ namespace ChatRPG.Agents.ReAct;
 
 internal sealed class ReActArchivistAgent(
     IChatModelFactory models,
+    GameSummaryFormatter summaryFormatter,
     IInstructionCatalog instructions,
     IToolFactory toolFactory,
     IOptions<AgentOptions> options) : IArchivist
@@ -22,42 +23,42 @@ internal sealed class ReActArchivistAgent(
     private const double NarrativeChangesTemperature = 0.7;
     private const double SummaryTemperature = 0.4;
 
-    public async Task ApplyNarrativeChangesAsync(
-        Campaign campaign,
-        string playerInput,
-        string narration,
-        CancellationToken ct = default)
+    public async Task<ArchiveResult> ApplyNarrativeChangesAsync(ArchiveRequest request, CancellationToken ct = default)
     {
-        string characters = JsonSerializer.Serialize(campaign.Characters.Select(c => new { c.Name, c.Description, c.Type }));
-        string environments = JsonSerializer.Serialize(campaign.Environments.Select(e => new { e.Name, e.Description }));
-        string gameSummary = GameSummaryFormatter.Format(campaign, options.Value.IncludePreviousMessages);
+        string characters = JsonSerializer.Serialize(request.Characters.Select(c => new { c.Name, c.Description }));
+        string locations = JsonSerializer.Serialize(request.Locations);
+        string gameSummary = await summaryFormatter.FormatAsync(request.CampaignId, request.GameSummary, ct);
 
+        var collector = new ChangeCollector();
         var agent = new ReActAgent(models.CreateChat(NarrativeChangesTemperature, nameof(ReActArchivistAgent)), instructions.Get(InstructionKey.Archive))
         {
             Variables =
             {
                 ["characters"] = characters,
-                ["environments"] = environments,
-                ["player_character"] = campaign.Player.Name,
+                ["locations"] = locations,
+                ["player_character"] = request.Characters.First(c => c.IsPlayer).Name,
                 ["gameSummary"] = gameSummary
             },
             Tools =
             {
-                toolFactory.GetUpdateCharacterTool(campaign),
-                toolFactory.GetUpdateEnvironmentTool(campaign)
+                toolFactory.GetUpdateCharacterTool(request.Characters, collector),
+                toolFactory.GetUpdateLocationTool(request.Locations, collector)
             }
         };
 
         // TODO: Format in a helper or similar
-        string modelInput = $"The player says: {playerInput}\nThe DM says: {narration}";
+        string modelInput = $"The player says: {request.PlayerInput}\nThe DM says: {request.Narration}";
         await agent.RunAsync(modelInput, ct);
+
+        return new ArchiveResult(
+            "new summary", collector.CharacterChanges, collector.NewCharacters, collector.LocationChanges);
     }
 
     public async Task AppendMessagesAsync(
         Campaign campaign,
         string playerInput,
         string narration,
-        AdherenceVerdict? adherenceVerdict,
+        ActionRuling? ruling,
         string? epilogue,
         CancellationToken ct = default)
     {
@@ -75,29 +76,23 @@ internal sealed class ReActArchivistAgent(
         else
         {
             campaign.GameSummary += $"Player: {playerInput}\n";
-            if (adherenceVerdict is not null)
+            if (ruling is not null)
             {
-                campaign.GameSummary += $"Scenario Adherence Verdict: {adherenceVerdict.ToPromptString()}";
+                campaign.GameSummary += $"{ActionRulingFormatter.Format(ruling)}\n";
             }
             campaign.GameSummary += $"GM: {narration}\n\n";
         }
 
-        Verdict? verdict = null;
-        if (adherenceVerdict is not null)
-        {
-            verdict = new Verdict(campaign, adherenceVerdict.ToPromptString());
-        }
-
         if (campaign.Messages.Count != 0)
         {
-            campaign.Messages.Add(new Message(campaign, Domain.Enums.MessageRole.User, playerInput, verdict));
+            campaign.Messages.Add(new PlayerMessage(campaign, playerInput, ruling));
         }
-        
-        campaign.Messages.Add(new Message(campaign, Domain.Enums.MessageRole.Assistant, narration));
+
+        campaign.Messages.Add(new NarrationMessage(campaign, narration));
 
         if (epilogue != null)
         {
-            campaign.Messages.Add(new Message(campaign, Domain.Enums.MessageRole.Assistant, epilogue));
+            campaign.Messages.Add(new NarrationMessage(campaign, epilogue));
         }
     }
 }

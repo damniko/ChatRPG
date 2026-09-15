@@ -1,7 +1,7 @@
 using ChatRPG.Agents.Llm;
 using ChatRPG.Agents.Tests.ReAct;
-using ChatRPG.Application.Abstractions;
 using ChatRPG.Application.Gameplay;
+using ChatRPG.Domain.Entities;
 
 namespace ChatRPG.Agents.Tests.Llm;
 
@@ -17,29 +17,43 @@ public class NarrationInputFormatterTests
         var request = new NarrationRequest.PlayerTurn(
             NarratorFixture.Campaign(isOpenWorld: true), new PlayerAction(PlayerActionKind.Do, "I open the door"));
 
-        // No scaffolding to add: there is no verdict and no graph behind an open world.
+        // No scaffolding to add: there is no ruling and no graph behind an open world.
         Assert.Equal("I open the door", NarrationInputFormatter.Format(request));
     }
 
     [Fact]
-    public void Format_ScenarioTurn_CarriesTheVerdictAndTheGraphUpdate()
+    public void Format_ScenarioTurn_CarriesTheRulingAndTheGraphUpdate()
     {
         var campaign = NarratorFixture.Campaign(isOpenWorld: false, NarratorFixture.Graph());
 
         var request = new NarrationRequest.PlayerTurn(
             campaign,
             new PlayerAction(PlayerActionKind.Say, "I greet the innkeeper"),
-            new AdherenceVerdict(false, "The innkeeper has already left."),
+            new ActionRuling(ActionPermission.Disallowed, "The innkeeper has already left."),
             "Moved to The Tavern.");
 
         string formatted = NarrationInputFormatter.Format(request);
 
         Assert.Contains("Player input (Say):", formatted);
         Assert.Contains("I greet the innkeeper", formatted);
-        Assert.Contains("Denied", formatted);
-        Assert.Contains("The innkeeper has already left.", formatted);
+        Assert.Contains("Ruling: DISALLOWED", formatted);
+        Assert.Contains("Reasoning: The innkeeper has already left.", formatted);
         Assert.Contains("Graph update summary:", formatted);
         Assert.Contains("Moved to The Tavern.", formatted);
+    }
+
+    [Fact]
+    public void Format_ConditionalRuling_ReachesTheNarratorAsItsOwnState()
+    {
+        // The narrator branches on three states; "conditional" must not arrive looking like a denial.
+        var campaign = NarratorFixture.Campaign(isOpenWorld: false, NarratorFixture.Graph());
+
+        var request = new NarrationRequest.PlayerTurn(
+            campaign,
+            new PlayerAction(PlayerActionKind.Do, "I cross the rope bridge"),
+            new ActionRuling(ActionPermission.Conditional, "The rope is frayed."));
+
+        Assert.Contains("Ruling: CONDITIONAL", NarrationInputFormatter.Format(request));
     }
 
     [Fact]
@@ -48,11 +62,13 @@ public class NarrationInputFormatterTests
         var campaign = NarratorFixture.Campaign(isOpenWorld: false, NarratorFixture.Graph());
 
         var request = new NarrationRequest.PlayerTurn(
-            campaign, new PlayerAction(PlayerActionKind.Do, "I wait"), new AdherenceVerdict(true, "Nothing stops it."));
+            campaign,
+            new PlayerAction(PlayerActionKind.Do, "I wait"),
+            new ActionRuling(ActionPermission.Allowed, "Nothing stops it."));
 
         string formatted = NarrationInputFormatter.Format(request);
 
-        Assert.Contains("Allowed", formatted);
+        Assert.Contains("Ruling: ALLOWED", formatted);
         Assert.DoesNotContain("Graph update summary:", formatted);
     }
 

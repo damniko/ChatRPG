@@ -11,6 +11,6 @@ public class CharacterConfiguration : IEntityTypeConfiguration<Character>
         builder.ToTable("Characters");
         builder.HasKey(c => c.Id);
         builder.HasOne(c => c.Campaign).WithMany(campaign => campaign.Characters);
-        builder.HasOne(c => c.Environment).WithMany();
+        builder.HasOne(c => c.Location).WithMany();
     }
 }

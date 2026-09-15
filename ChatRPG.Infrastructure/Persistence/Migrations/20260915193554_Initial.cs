@@ -308,7 +308,7 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Environments",
+                name: "Locations",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -319,9 +319,9 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Environments", x => x.Id);
+                    table.PrimaryKey("PK_Locations", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Environments_Campaigns_CampaignId",
+                        name: "FK_Locations_Campaigns_CampaignId",
                         column: x => x.CampaignId,
                         principalTable: "Campaigns",
                         principalColumn: "Id",
@@ -329,19 +329,23 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Verdicts",
+                name: "Messages",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CampaignId = table.Column<int>(type: "integer", nullable: false),
-                    Content = table.Column<string>(type: "text", nullable: false)
+                    Content = table.Column<string>(type: "text", nullable: false),
+                    Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Author = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
+                    Ruling_Permission = table.Column<string>(type: "text", nullable: true),
+                    Ruling_Reasoning = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Verdicts", x => x.Id);
+                    table.PrimaryKey("PK_Messages", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Verdicts_Campaigns_CampaignId",
+                        name: "FK_Messages_Campaigns_CampaignId",
                         column: x => x.CampaignId,
                         principalTable: "Campaigns",
                         principalColumn: "Id",
@@ -355,7 +359,7 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CampaignId = table.Column<int>(type: "integer", nullable: false),
-                    EnvironmentId = table.Column<int>(type: "integer", nullable: false),
+                    LocationId = table.Column<int>(type: "integer", nullable: false),
                     Type = table.Column<int>(type: "integer", nullable: false),
                     IsPlayer = table.Column<bool>(type: "boolean", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
@@ -374,40 +378,11 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Characters_Environments_EnvironmentId",
-                        column: x => x.EnvironmentId,
-                        principalTable: "Environments",
+                        name: "FK_Characters_Locations_LocationId",
+                        column: x => x.LocationId,
+                        principalTable: "Locations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Messages",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    CampaignId = table.Column<int>(type: "integer", nullable: false),
-                    Role = table.Column<int>(type: "integer", nullable: false),
-                    Content = table.Column<string>(type: "text", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    VerdictId = table.Column<int>(type: "integer", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Messages", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Messages_Campaigns_CampaignId",
-                        column: x => x.CampaignId,
-                        principalTable: "Campaigns",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Messages_Verdicts_VerdictId",
-                        column: x => x.VerdictId,
-                        principalTable: "Verdicts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateIndex(
@@ -468,14 +443,9 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                 column: "CampaignId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Characters_EnvironmentId",
+                name: "IX_Characters_LocationId",
                 table: "Characters",
-                column: "EnvironmentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Environments_CampaignId",
-                table: "Environments",
-                column: "CampaignId");
+                column: "LocationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GraphVisualizations_NarrativeGraphId",
@@ -483,15 +453,14 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                 column: "NarrativeGraphId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Messages_CampaignId",
-                table: "Messages",
+                name: "IX_Locations_CampaignId",
+                table: "Locations",
                 column: "CampaignId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Messages_VerdictId",
+                name: "IX_Messages_CampaignId",
                 table: "Messages",
-                column: "VerdictId",
-                unique: true);
+                column: "CampaignId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_NarrativeEdges_SourceNodeId",
@@ -513,11 +482,6 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                 table: "Users",
                 column: "IdentityId",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Verdicts_CampaignId",
-                table: "Verdicts",
-                column: "CampaignId");
         }
 
         /// <inheritdoc />
@@ -557,10 +521,7 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Environments");
-
-            migrationBuilder.DropTable(
-                name: "Verdicts");
+                name: "Locations");
 
             migrationBuilder.DropTable(
                 name: "NarrativeNodes");

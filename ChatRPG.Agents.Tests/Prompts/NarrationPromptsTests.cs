@@ -42,15 +42,15 @@ public class NarrationPromptsTests
 
     [Theory]
     [InlineData(PlayerActionKind.Do, false, nameof(InstructionKey.Do))]
-    [InlineData(PlayerActionKind.Do, true, nameof(InstructionKey.DoWithVerdict))]
+    [InlineData(PlayerActionKind.Do, true, nameof(InstructionKey.DoWithRuling))]
     [InlineData(PlayerActionKind.Say, false, nameof(InstructionKey.Say))]
-    [InlineData(PlayerActionKind.Say, true, nameof(InstructionKey.SayWithVerdict))]
+    [InlineData(PlayerActionKind.Say, true, nameof(InstructionKey.SayWithRuling))]
     public void InstructionFor_PlayerTurn_FollowsTheActionKindAndWhetherTheExaminerRuled(
-        PlayerActionKind kind, bool hasVerdict, string expected)
+        PlayerActionKind kind, bool hasRuling, string expected)
     {
-        var verdict = hasVerdict ? new AdherenceVerdict(true, "The door is unlocked.") : null;
+        var ruling = hasRuling ? new ActionRuling(ActionPermission.Allowed, "The door is unlocked.") : null;
 
-        var request = new NarrationRequest.PlayerTurn(OpenWorld(), Action(kind), verdict);
+        var request = new NarrationRequest.PlayerTurn(OpenWorld(), Action(kind), ruling);
 
         Assert.Equal(expected, NarrationPrompts.InstructionFor(request).ToString());
     }

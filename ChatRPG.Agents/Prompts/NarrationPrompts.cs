@@ -16,9 +16,9 @@ internal static class NarrationPrompts
             NarrationRequest.Opening => InstructionKey.Initial,
             NarrationRequest.Epilogue => InstructionKey.GameOver,
             NarrationRequest.PlayerTurn { Action.Kind: PlayerActionKind.Do } turn =>
-                turn.Verdict is null ? InstructionKey.Do : InstructionKey.DoWithVerdict,
+                turn.Ruling is null ? InstructionKey.Do : InstructionKey.DoWithRuling,
             NarrationRequest.PlayerTurn { Action.Kind: PlayerActionKind.Say } turn =>
-                turn.Verdict is null ? InstructionKey.Say : InstructionKey.SayWithVerdict,
+                turn.Ruling is null ? InstructionKey.Say : InstructionKey.SayWithRuling,
             _ => throw new ArgumentOutOfRangeException(nameof(request), request, null)
         };
     }

@@ -15,7 +15,6 @@ using ChatRPG.Domain.Entities;
 using ChatRPG.Domain.Enums;
 using LangChain.Providers;
 using Moq;
-using Environment = ChatRPG.Domain.Entities.Environment;
 
 namespace ChatRPG.Agents.Tests.ReAct;
 
@@ -74,9 +73,9 @@ internal sealed class NarratorFixture
                 c, Prompts.Object, Descriptions(), Parser(), new BattleValidator(new CharacterValidator()),
                 CharacterFinder(), new SystemRandomSource(), Combat()));
 
-        Tools.Setup(t => t.GetSearchScenarioTool(It.IsAny<Campaign>()))
-            .Returns((Campaign c) => new SearchScenarioTool(
-                c, "<summary>", Mock.Of<IScenarioDocumentStore>(), Models.Object, Prompts.Object,
+        Tools.Setup(t => t.GetSearchScenarioTool(It.IsAny<Campaign>(), It.IsAny<string>()))
+            .Returns((Campaign c, string summary) => new SearchScenarioTool(
+                c, summary, Mock.Of<IScenarioDocumentStore>(), Models.Object, Prompts.Object,
                 Descriptions(), Parser(), new SearchScenarioValidator()));
     }
 
@@ -92,9 +91,20 @@ internal sealed class NarratorFixture
         return new NarratorFixture(ChatModelStub.Answering(outputs), options ?? new AgentOptions());
     }
 
+    private static GameSummaryFormatter SummaryFormatter(AgentOptions? options = null)
+    {
+        var history = new Mock<IMessageHistory>();
+        history.Setup(h => h.GetRecentAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<MessageView>());
+
+        return new GameSummaryFormatter(history.Object, Microsoft.Extensions.Options.Options.Create(options ?? new AgentOptions()));
+    }
+
     public ReActNarratorAgent Narrator()
     {
-        return new ReActNarratorAgent(Models.Object, Prompts.Object, Tools.Object, Microsoft.Extensions.Options.Options.Create(Options));
+        return new ReActNarratorAgent(
+            Models.Object, SummaryFormatter(Options), Prompts.Object, Tools.Object,
+            Microsoft.Extensions.Options.Options.Create(Options));
     }
 
     /// <summary>The prompt the model was asked to complete on its first step.</summary>
@@ -108,10 +118,10 @@ internal sealed class NarratorFixture
             NarrativeGraph = graph,
         };
 
-        var environment = new Environment(campaign, "The Tavern", "Warm, loud and smelling of ale.");
-        campaign.Environments.Add(environment);
+        var location = new Location(campaign, "The Tavern", "Warm, loud and smelling of ale.");
+        campaign.Locations.Add(location);
         campaign.Characters.Add(
-            new Character(campaign, environment, CharacterType.Humanoid, "Aldric", "A weary knight.", true));
+            new Character(campaign, location, CharacterType.Humanoid, "Aldric", "A weary knight.", true));
 
         return campaign;
     }

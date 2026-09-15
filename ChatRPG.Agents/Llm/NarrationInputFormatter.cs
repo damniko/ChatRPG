@@ -43,11 +43,9 @@ internal static class NarrationInputFormatter
             .Append($"Player input ({turn.Action.Kind}):\n")
             .Append(turn.Action.Text);
 
-        if (turn.Verdict is { } verdict)
+        if (turn.Ruling is { } ruling)
         {
-            sb.Append("\nAdherence verdict:\n")
-                .Append(verdict.IsAllowed ? "Allowed" : "Denied")
-                .Append($" (reasoning: {verdict.Reasoning})");
+            sb.Append('\n').Append(ActionRulingFormatter.Format(ruling));
         }
 
         AppendGraphSummary(sb, turn.GraphSummary);

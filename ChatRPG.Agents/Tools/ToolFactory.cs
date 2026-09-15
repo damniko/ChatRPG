@@ -35,17 +35,17 @@ internal class ToolFactory(
     public AddEndNodeTool GetAddEndNodeTool(NarrativeGraph graph) 
         => new(graph, descriptions, parser, validators.Create<ToolData.AddEndNode>());
 
-    public UpdateCharacterTool GetUpdateCharacterTool(Campaign campaign) =>
-        new(parser, campaign, validators.Create<ToolData.Character>(), descriptions);
+    public UpdateCharacterTool GetUpdateCharacterTool(IReadOnlyList<CharacterView> characters, ChangeCollector changes) =>
+        new(characters, changes, parser, validators.Create<ToolData.Character>(), descriptions);
 
-    public UpdateEnvironmentTool GetUpdateEnvironmentTool(Campaign campaign) =>
-        new(campaign, descriptions, parser, validators.Create<ToolData.Environment>());
+    public UpdateLocationTool GetUpdateLocationTool(IReadOnlyList<string> locations, ChangeCollector changes) =>
+        new(locations, changes, descriptions, parser, validators.Create<ToolData.Location>());
     
-    public SearchScenarioTool GetSearchScenarioTool(Campaign campaign) => 
-        new(campaign, GameSummaryFormatter.Format(campaign, options.Value.IncludePreviousMessages), documentStore, models, instructions, descriptions, parser, validators.Create<ToolData.SearchScenario>());
+    public SearchScenarioTool GetSearchScenarioTool(Campaign campaign, string gameSummary) =>
+        new(campaign, gameSummary, documentStore, models, instructions, descriptions, parser, validators.Create<ToolData.SearchScenario>());
     
-    public UpdateGraphTool GetUpdateGraphTool(Campaign campaign, AdherenceVerdict verdict) =>
-        new(campaign, GameSummaryFormatter.Format(campaign, options.Value.IncludePreviousMessages), verdict, models, instructions, descriptions, parser, validators.Create<ToolData.UpdateGraph>());
+    public UpdateGraphTool GetUpdateGraphTool(Campaign campaign, string gameSummary, ActionRuling ruling) =>
+        new(campaign, gameSummary, ruling, models, instructions, descriptions, parser, validators.Create<ToolData.UpdateGraph>());
 
     public BattleTool GetBattleTool(Campaign campaign) =>
         new(campaign, instructions, descriptions, parser, validators.Create<ToolData.Battle>(), characterFinder, randomSource, combatResolver);

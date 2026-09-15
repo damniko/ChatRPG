@@ -31,7 +31,7 @@ Context for Evaluation
 Narrative Graph: {graph}
 Game Summary: {gameSummary}
 Player input: {input}
-Verdict: {verdict}
+{ruling}
 Edge Under Evaluation: {edge} 
 Carefully assess the conditions and return your structured evaluation. 
 History: {attempts}

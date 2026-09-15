@@ -9,10 +9,10 @@ internal interface IToolFactory
     AddEdgeTool GetAddEdgeTool(NarrativeGraph graph);
     AddNodeTool GetAddNodeTool(NarrativeGraph graph);
     AddEndNodeTool GetAddEndNodeTool(NarrativeGraph graph);
-    UpdateCharacterTool GetUpdateCharacterTool(Campaign campaign);
-    UpdateEnvironmentTool GetUpdateEnvironmentTool(Campaign campaign);
-    SearchScenarioTool GetSearchScenarioTool(Campaign campaign);
-    UpdateGraphTool GetUpdateGraphTool(Campaign campaign, AdherenceVerdict verdict);
+    UpdateCharacterTool GetUpdateCharacterTool(IReadOnlyList<CharacterView> characters, ChangeCollector changes);
+    UpdateLocationTool GetUpdateLocationTool(IReadOnlyList<string> locations, ChangeCollector changes);
+    SearchScenarioTool GetSearchScenarioTool(Campaign campaign, string gameSummary);
+    UpdateGraphTool GetUpdateGraphTool(Campaign campaign, string gameSummary, ActionRuling ruling);
     BattleTool GetBattleTool(Campaign campaign);
     WoundCharacterTool GetWoundCharacterTool(Campaign campaign);
     HealCharacterTool GetHealCharacterTool(Campaign campaign);

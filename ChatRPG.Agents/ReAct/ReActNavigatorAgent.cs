@@ -1,18 +1,16 @@
-using ChatRPG.Agents.Configuration;
 using ChatRPG.Agents.Llm;
 using ChatRPG.Agents.Prompts;
 using ChatRPG.Agents.Prompts.Catalogs;
 using ChatRPG.Agents.Tools;
 using ChatRPG.Application.Abstractions;
 using ChatRPG.Domain.Entities;
-using Microsoft.Extensions.Options;
 
 namespace ChatRPG.Agents.ReAct;
 
 internal sealed class ReActNavigatorAgent(
     IChatModelFactory models,
+    GameSummaryFormatter summaryFormatter,
     IInstructionCatalog instructions,
-    IOptions<AgentOptions> options,
     IToolFactory toolFactory) : IGraphNavigator
 {
     private const double Temperature = 0.4;
@@ -20,10 +18,10 @@ internal sealed class ReActNavigatorAgent(
     public async Task<string> ReviewGraphAsync(
         Campaign campaign,
         string playerInput,
-        AdherenceVerdict verdict,
+        ActionRuling ruling,
         CancellationToken ct = default)
     {
-        string gameSummary = GameSummaryFormatter.Format(campaign, options.Value.IncludePreviousMessages);
+        string gameSummary = await summaryFormatter.FormatAsync(campaign.Id, campaign.GameSummary, ct);
 
         // TODO: Improve NarrativeGraph detection ("open world" vs scenario-based)
         var agent = new ReActAgent(models.CreateChat(Temperature, nameof(ReActNavigatorAgent)), instructions.Get(InstructionKey.Navigate))
@@ -35,12 +33,11 @@ internal sealed class ReActNavigatorAgent(
             },
             Tools =
             {
-                toolFactory.GetUpdateGraphTool(campaign, verdict)
+                toolFactory.GetUpdateGraphTool(campaign, gameSummary, ruling)
             }
         };
 
-        // TODO: Consider a helper for formatting the input
-        string formattedInput = $"Player input: {playerInput}\nAdherence verdict: {verdict.ToPromptString()}";
+        string formattedInput = $"Player input: {playerInput}\n{ActionRulingFormatter.Format(ruling)}";
         return await agent.RunAsync(formattedInput, ct);
     }
 }

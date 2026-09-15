@@ -7,7 +7,7 @@ namespace ChatRPG.Application.Gameplay;
 
 public class GameTurnService(
     INarrator narrator,
-    IInputExaminer examiner,
+    IActionExaminer examiner,
     IGraphNavigator navigator,
     IArchivist archivist,
     IUnitOfWork unitOfWork) : IGameTurnService
@@ -17,19 +17,19 @@ public class GameTurnService(
         PlayerAction action,
         [EnumeratorCancellation] CancellationToken ct = default)
     {
-        AdherenceVerdict? verdict = null;
+        ActionRuling? ruling = null;
         string? graphSummary = null;
 
         if (!campaign.IsOpenWorld)
         {
-            verdict = await examiner.ExamineAsync(campaign, action.Text, ct);
-            if (!verdict.IsAllowed)
+            ruling = await examiner.ExamineAsync(campaign, action.Text, ct);
+            if (!ruling.AttemptProceeds)
             {
-                yield return new TurnEvent.InputRejected(verdict.Reasoning);
+                yield return new TurnEvent.InputRejected(ruling.Reasoning);
             }
             else
             {
-                graphSummary = await navigator.ReviewGraphAsync(campaign, action.Text, verdict, ct);
+                graphSummary = await navigator.ReviewGraphAsync(campaign, action.Text, ruling, ct);
             }
         }
 
@@ -37,7 +37,7 @@ public class GameTurnService(
 
         var narration = new StringBuilder();
 
-        var request = new NarrationRequest.PlayerTurn(campaign, action, verdict, graphSummary);
+        var request = new NarrationRequest.PlayerTurn(campaign, action, ruling, graphSummary);
 
         await foreach (string chunk in narrator.NarrateStreamingAsync(request, ct))
         {
@@ -56,8 +56,8 @@ public class GameTurnService(
         }
 
         yield return new TurnEvent.ArchivingStarted();
-        await archivist.ApplyNarrativeChangesAsync(campaign, action.Text, narration.ToString(), ct);
-        await archivist.AppendMessagesAsync(campaign, action.Text, narration.ToString(), verdict, null, ct);
+        await archivist.ApplyNarrativeChangesAsync(ArchiveRequestFor(campaign, action.Text, narration.ToString()), ct);
+        await archivist.AppendMessagesAsync(campaign, action.Text, narration.ToString(), ruling, null, ct);
         await unitOfWork.SaveChangesAsync(ct);
 
         yield return new TurnEvent.CampaignSaved();
@@ -71,8 +71,8 @@ public class GameTurnService(
         string? graphUpdateSummary = null;
         if (!campaign.IsOpenWorld)
         {
-            var verdict = new AdherenceVerdict(true, "The scenario is created directly from the scenario document.");
-            graphUpdateSummary = await navigator.ReviewGraphAsync(campaign, openingPrompt, verdict, ct);
+            graphUpdateSummary = await navigator.ReviewGraphAsync(
+                campaign, openingPrompt, ActionRuling.ScenarioOpening, ct);
         }
         yield return new TurnEvent.NarrationStarted();
 
@@ -89,7 +89,7 @@ public class GameTurnService(
         yield return new TurnEvent.NarrationCompleted(narration.ToString());
         
         yield return new TurnEvent.ArchivingStarted();
-        await archivist.ApplyNarrativeChangesAsync(campaign, openingPrompt, narration.ToString(), ct);
+        await archivist.ApplyNarrativeChangesAsync(ArchiveRequestFor(campaign, openingPrompt, narration.ToString()), ct);
         await archivist.AppendMessagesAsync(campaign, openingPrompt, narration.ToString(), null, null, ct);
         await unitOfWork.SaveChangesAsync(ct);
 
@@ -97,6 +97,21 @@ public class GameTurnService(
     }
 
     
+    // TODO: The returned ArchiveResult is not applied back to the campaign yet, so character and
+    // location changes the archivist collects are still dropped.
+    private static ArchiveRequest ArchiveRequestFor(Campaign campaign, string playerInput, string narration)
+    {
+        return new ArchiveRequest(
+            campaign.Id,
+            campaign.GameSummary,
+            campaign.Characters
+                .Select(c => new CharacterView(c.Id, c.Name, c.Description, c.CurrentHealth, c.IsPlayer, c.Type))
+                .ToList(),
+            campaign.Locations.Select(e => e.Name).ToList(),
+            playerInput,
+            narration);
+    }
+
     private static bool IsGameOver(Campaign campaign)
     {
         if (campaign.IsOpenWorld)

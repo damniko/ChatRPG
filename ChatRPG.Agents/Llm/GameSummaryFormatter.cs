@@ -1,6 +1,7 @@
 using System.Text;
-using ChatRPG.Domain.Entities;
-using ChatRPG.Domain.Enums;
+using ChatRPG.Agents.Configuration;
+using ChatRPG.Application.Abstractions;
+using Microsoft.Extensions.Options;
 
 namespace ChatRPG.Agents.Llm;
 
@@ -8,17 +9,18 @@ namespace ChatRPG.Agents.Llm;
 /// Renders the <c>{gameSummary}</c>: the running summary of the campaign, optionally followed by the last few messages
 /// verbatim so the model can see the exact wording of what just happened rather than only its summarised form.
 /// </summary>
-internal static class GameSummaryFormatter
+internal sealed class GameSummaryFormatter(IMessageHistory messages, IOptions<AgentOptions> options)
 {
-    private const int IncludedPreviousMessages = 4;
+    /// <summary>Number of messages to include when summarizing from message history.</summary>
+    private const int MessageWindowSize = 4;
 
-    public static string Format(Campaign campaign, bool includePreviousMessages)
+    public async Task<string> FormatAsync(int campaignId, string currentSummary, CancellationToken ct = default)
     {
         var summary = new StringBuilder()
             .Append("\n\nThe story up until now: ")
-            .Append(campaign.GameSummary);
+            .Append(currentSummary);
 
-        if (!includePreviousMessages)
+        if (!options.Value.IncludePreviousMessages)
         {
             return summary.ToString();
         }
@@ -26,22 +28,8 @@ internal static class GameSummaryFormatter
         summary.Append(
             "\n\nUse these previous messages as context. They only serve to give a hint of the current scenario:");
 
-        foreach (var message in campaign.Messages.TakeLast(IncludedPreviousMessages))
-        {
-            if (message.Role == MessageRole.User)
-            {
-                summary.Append("\nPlayer: ").Append(message.Content);
-
-                if (message.Verdict is { } verdict)
-                {
-                    summary.Append("\nAdherence verdict: ").Append(verdict.Content);
-                }
-            }
-            else
-            {
-                summary.Append("\nGM: ").Append(message.Content).Append('\n');
-            }
-        }
+        var messageWindow = await messages.GetRecentAsync(campaignId, MessageWindowSize, ct);
+        MessageTranscript.Append(summary, messageWindow);
 
         return summary.ToString();
     }

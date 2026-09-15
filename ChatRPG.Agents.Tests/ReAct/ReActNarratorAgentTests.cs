@@ -32,7 +32,7 @@ public class ReActNarratorAgentTests
 
         // There is no scenario document to search in an open world, so the tool is never built.
         Assert.DoesNotContain("searchscenariotool", prompt);
-        fixture.Tools.Verify(t => t.GetSearchScenarioTool(It.IsAny<Campaign>()), Times.Never);
+        fixture.Tools.Verify(t => t.GetSearchScenarioTool(It.IsAny<Campaign>(), It.IsAny<string>()), Times.Never);
     }
 
     [Fact]

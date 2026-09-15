@@ -15,7 +15,7 @@ namespace ChatRPG.Agents.Tools.Implementations;
 internal sealed class UpdateGraphTool(
     Campaign campaign,
     string gameSummary,
-    AdherenceVerdict verdict,
+    ActionRuling ruling,
     IChatModelFactory models,
     IInstructionCatalog instructions,
     IToolDescriptionCatalog descriptions,
@@ -114,7 +114,7 @@ internal sealed class UpdateGraphTool(
                 new Dictionary<string, string>
                 {
                     ["gameSummary"] = gameSummary,
-                    ["verdict"] = verdict.ToPromptString(),
+                    ["ruling"] = ActionRulingFormatter.Format(ruling),
                     ["graph"] = NarrativeGraphFormatter.Format(campaign.NarrativeGraph!),
                     ["edge"] = NarrativeGraphFormatter.Format(edge),
                     ["attempts"] = previousAttempts.ToString()

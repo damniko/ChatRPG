@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChatRPG.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ChatRpgDbContext))]
-    [Migration("20260913183015_Initial")]
+    [Migration("20260915193554_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -94,11 +94,11 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("EnvironmentId")
-                        .HasColumnType("integer");
-
                     b.Property<bool>("IsPlayer")
                         .HasColumnType("boolean");
+
+                    b.Property<int>("LocationId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("MaxHealth")
                         .HasColumnType("integer");
@@ -117,35 +117,9 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CampaignId");
 
-                    b.HasIndex("EnvironmentId");
+                    b.HasIndex("LocationId");
 
                     b.ToTable("Characters", (string)null);
-                });
-
-            modelBuilder.Entity("ChatRPG.Domain.Entities.Environment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CampaignId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CampaignId");
-
-                    b.ToTable("Environments", (string)null);
                 });
 
             modelBuilder.Entity("ChatRPG.Domain.Entities.GraphVisualization", b =>
@@ -176,7 +150,7 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                     b.ToTable("GraphVisualizations", (string)null);
                 });
 
-            modelBuilder.Entity("ChatRPG.Domain.Entities.Message", b =>
+            modelBuilder.Entity("ChatRPG.Domain.Entities.Location", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -187,27 +161,53 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                     b.Property<int>("CampaignId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Content")
+                    b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("VerdictId")
-                        .HasColumnType("integer");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CampaignId");
 
-                    b.HasIndex("VerdictId")
-                        .IsUnique();
+                    b.ToTable("Locations", (string)null);
+                });
+
+            modelBuilder.Entity("ChatRPG.Domain.Entities.Message", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Author")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
+
+                    b.Property<int>("CampaignId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CampaignId");
 
                     b.ToTable("Messages", (string)null);
+
+                    b.HasDiscriminator<string>("Author").HasValue("Message");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("ChatRPG.Domain.Entities.NarrativeEdge", b =>
@@ -324,28 +324,6 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Users", (string)null);
-                });
-
-            modelBuilder.Entity("ChatRPG.Domain.Entities.Verdict", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CampaignId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CampaignId");
-
-                    b.ToTable("Verdicts", (string)null);
                 });
 
             modelBuilder.Entity("ChatRPG.Infrastructure.Identity.ApplicationUser", b =>
@@ -543,6 +521,20 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ChatRPG.Domain.Entities.NarrationMessage", b =>
+                {
+                    b.HasBaseType("ChatRPG.Domain.Entities.Message");
+
+                    b.HasDiscriminator().HasValue("Narrator");
+                });
+
+            modelBuilder.Entity("ChatRPG.Domain.Entities.PlayerMessage", b =>
+                {
+                    b.HasBaseType("ChatRPG.Domain.Entities.Message");
+
+                    b.HasDiscriminator().HasValue("Player");
+                });
+
             modelBuilder.Entity("ChatRPG.Domain.Entities.Campaign", b =>
                 {
                     b.HasOne("ChatRPG.Domain.Entities.NarrativeGraph", "NarrativeGraph")
@@ -572,26 +564,15 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ChatRPG.Domain.Entities.Environment", "Environment")
+                    b.HasOne("ChatRPG.Domain.Entities.Location", "Location")
                         .WithMany()
-                        .HasForeignKey("EnvironmentId")
+                        .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Campaign");
 
-                    b.Navigation("Environment");
-                });
-
-            modelBuilder.Entity("ChatRPG.Domain.Entities.Environment", b =>
-                {
-                    b.HasOne("ChatRPG.Domain.Entities.Campaign", "Campaign")
-                        .WithMany("Environments")
-                        .HasForeignKey("CampaignId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Campaign");
+                    b.Navigation("Location");
                 });
 
             modelBuilder.Entity("ChatRPG.Domain.Entities.GraphVisualization", b =>
@@ -605,6 +586,17 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                     b.Navigation("NarrativeGraph");
                 });
 
+            modelBuilder.Entity("ChatRPG.Domain.Entities.Location", b =>
+                {
+                    b.HasOne("ChatRPG.Domain.Entities.Campaign", "Campaign")
+                        .WithMany("Locations")
+                        .HasForeignKey("CampaignId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Campaign");
+                });
+
             modelBuilder.Entity("ChatRPG.Domain.Entities.Message", b =>
                 {
                     b.HasOne("ChatRPG.Domain.Entities.Campaign", "Campaign")
@@ -613,14 +605,7 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ChatRPG.Domain.Entities.Verdict", "Verdict")
-                        .WithOne()
-                        .HasForeignKey("ChatRPG.Domain.Entities.Message", "VerdictId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.Navigation("Campaign");
-
-                    b.Navigation("Verdict");
                 });
 
             modelBuilder.Entity("ChatRPG.Domain.Entities.NarrativeEdge", b =>
@@ -651,17 +636,6 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Graph");
-                });
-
-            modelBuilder.Entity("ChatRPG.Domain.Entities.Verdict", b =>
-                {
-                    b.HasOne("ChatRPG.Domain.Entities.Campaign", "Campaign")
-                        .WithMany()
-                        .HasForeignKey("CampaignId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Campaign");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -715,11 +689,37 @@ namespace ChatRPG.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ChatRPG.Domain.Entities.PlayerMessage", b =>
+                {
+                    b.OwnsOne("ChatRPG.Domain.Entities.ActionRuling", "Ruling", b1 =>
+                        {
+                            b1.Property<int>("PlayerMessageId")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("Permission")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("Reasoning")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.HasKey("PlayerMessageId");
+
+                            b1.ToTable("Messages");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PlayerMessageId");
+                        });
+
+                    b.Navigation("Ruling");
+                });
+
             modelBuilder.Entity("ChatRPG.Domain.Entities.Campaign", b =>
                 {
                     b.Navigation("Characters");
 
-                    b.Navigation("Environments");
+                    b.Navigation("Locations");
 
                     b.Navigation("Messages");
                 });

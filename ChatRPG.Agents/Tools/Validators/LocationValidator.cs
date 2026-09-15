@@ -3,9 +3,9 @@ using ChatRPG.Agents.Tools.Parsing;
 namespace ChatRPG.Agents.Tools.Validators;
 
 // TODO: Maybe we can use data annotations to simplify the validation framework?
-internal sealed class EnvironmentValidator : IToolDataValidator<ToolData.Environment>
+internal sealed class LocationValidator : IToolDataValidator<ToolData.Location>
 {
-    public bool IsValid(ToolData.Environment toolData, out IList<string> errors)
+    public bool IsValid(ToolData.Location toolData, out IList<string> errors)
     {
         errors = [];
         if (string.IsNullOrWhiteSpace(toolData.Name))

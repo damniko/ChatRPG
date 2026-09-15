@@ -22,7 +22,7 @@ public class Campaign : IEntity
     public ICollection<Message> Messages { get; } = new List<Message>();
     public string GameSummary { get; set; } = string.Empty;
     public ICollection<Character> Characters { get; } = new List<Character>();
-    public ICollection<Environment> Environments { get; } = new List<Environment>();
+    public ICollection<Location> Locations { get; } = new List<Location>();
     public Character Player => Characters.First(c => c.IsPlayer);
     public bool IsOpenWorld { get; init; }
     public NarrativeGraph? NarrativeGraph { get; set; }

@@ -1,15 +1,16 @@
 using ChatRPG.Agents.Tools.Catalogs;
 using ChatRPG.Agents.Tools.Parsing;
 using ChatRPG.Agents.Tools.Validators;
-using ChatRPG.Domain.Entities;
+using ChatRPG.Application.Abstractions;
 using ChatRPG.Domain.Enums;
 using LangChain.Chains.StackableChains.Agents.Tools;
 
 namespace ChatRPG.Agents.Tools.Implementations;
 
 internal sealed class UpdateCharacterTool(
+    IReadOnlyList<CharacterView> characters,
+    ChangeCollector changes,
     IToolDataTextParser parser,
-    Campaign campaign,
     IToolDataValidator<ToolData.Character> validator,
     IToolDescriptionCatalog descriptions) : AgentTool(ToolName, descriptions.Get(ToolDescriptionKey.UpdateCharacter))
 {
@@ -30,18 +31,14 @@ internal sealed class UpdateCharacterTool(
         
         _ = Enum.TryParse<CharacterType>(characterData.Type, out var characterType);
 
-        var character = campaign.Characters.FirstOrDefault(c => c.Name == characterData.Name && c.Type == characterType);
+        var character = characters.FirstOrDefault(c => c.Name == characterData.Name && c.Type == characterType);
         if (character == null)
         {
-            character = new Character(campaign, campaign.Player.Environment, characterType, characterData.Name!, characterData.Description!, false);
-                
-            character.AdjustHealth((int)-(character.MaxHealth - character.MaxHealth * ScaleHealthBasedOnState(characterData.State!)));
-            campaign.Characters.Add(character);
-            return Task.FromResult($"A new character named {character.Name} has been created with description: {character.Description}");
+            changes.NewCharacter(characterData.Name!, characterData.Description!, characterType);
+            return Task.FromResult($"A new character named {characterData.Name} has been created with description: {characterData.Description}");
         }
         
-        character.Description = characterData.Description!;
-        character.Environment = campaign.Player.Environment;
+        changes.Describe(character.Id, characterData.Description!);
         return Task.FromResult($"{character.Name} has been updated with the description: {characterData.Description}");
     }
     

@@ -11,9 +11,8 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
         builder.ToTable("Messages");
         builder.HasKey(m => m.Id);
         builder.HasOne(m => m.Campaign).WithMany(c => c.Messages);
-        builder.HasOne(m => m.Verdict)
-            .WithOne()
-            .HasForeignKey<Message>("VerdictId")
-            .OnDelete(DeleteBehavior.SetNull);
+        builder.HasDiscriminator<string>("Author")
+            .HasValue<PlayerMessage>("Player")
+            .HasValue<NarrationMessage>("Narrator");
     }
 }
