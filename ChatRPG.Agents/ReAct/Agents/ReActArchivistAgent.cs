@@ -38,9 +38,7 @@ internal sealed class ReActArchivistAgent(
             }
         };
 
-        // TODO: Format in a helper or similar
-        string modelInput = $"The player says: {request.PlayerInput}\nThe DM says: {request.Narration}";
-        await agent.RunAsync(modelInput, ct);
+        await agent.RunAsync(ArchiveInputFormatter.Format(request), ct);
 
         return new ArchiveResult(
             collector.CharacterChanges, collector.NewCharacters, collector.LocationChanges);

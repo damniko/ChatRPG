@@ -7,13 +7,29 @@ public interface IArchivist
     Task<ArchiveResult> ApplyNarrativeChangesAsync(ArchiveRequest request, CancellationToken ct = default);
 }
 
-public sealed record ArchiveRequest(
+public abstract record ArchiveRequest(
     int CampaignId,
     string GameSummary,
     IReadOnlyList<CharacterView> Characters,
-    IReadOnlyList<string> Locations,
-    string PlayerInput,
-    string Narration);
+    IReadOnlyList<string> Locations)
+{
+    /// <summary>The player acted and the GM narrated the result.</summary>
+    public sealed record Turn(
+        int CampaignId,
+        string GameSummary,
+        IReadOnlyList<CharacterView> Characters,
+        IReadOnlyList<string> Locations,
+        string PlayerInput,
+        string Narration) : ArchiveRequest(CampaignId, GameSummary, Characters, Locations);
+
+    /// <summary>The first narration of a campaign; there is no player input yet.</summary>
+    public sealed record Opening(
+        int CampaignId,
+        string GameSummary,
+        IReadOnlyList<CharacterView> Characters,
+        IReadOnlyList<string> Locations,
+        string Narration) : ArchiveRequest(CampaignId, GameSummary, Characters, Locations);
+}
 
 public sealed record CharacterView(int Id, string Name, string Description, int Health, bool IsPlayer, CharacterType Type);
 

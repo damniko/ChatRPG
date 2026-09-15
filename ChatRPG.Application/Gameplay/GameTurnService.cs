@@ -59,7 +59,7 @@ public class GameTurnService(
         }
 
         yield return new TurnEvent.ArchivingStarted();
-        await archivist.ApplyNarrativeChangesAsync(ArchiveRequestFor(campaign, action.Text, narration.ToString()), ct);
+        await archivist.ApplyNarrativeChangesAsync(ArchiveTurn(campaign, action.Text, narration.ToString()), ct);
 
         campaign.GameSummary = await summarizer.SummarizeAsync(
             new SummaryRequest(campaign.GameSummary, action.Text, narration.ToString(), ruling), ct);
@@ -102,8 +102,7 @@ public class GameTurnService(
         yield return new TurnEvent.NarrationCompleted(narration.ToString());
         
         yield return new TurnEvent.ArchivingStarted();
-        // TODO: This is a bit smelly. Why do we need PlayerInput for this request?
-        await archivist.ApplyNarrativeChangesAsync(new ArchiveRequest(campaign.Id, campaign.GameSummary, campaign.Characters.Select(c => c.ToView()).ToList().AsReadOnly(), [], "", openingPrompt), ct);
+        await archivist.ApplyNarrativeChangesAsync(ArchiveOpening(campaign, narration.ToString()), ct);
 
         campaign.GameSummary = await summarizer.SummarizeAsync(
             new SummaryRequest(campaign.GameSummary, openingPrompt, narration.ToString(), null), ct);
@@ -118,17 +117,26 @@ public class GameTurnService(
     
     // TODO: The returned ArchiveResult is not applied back to the campaign yet, so character and
     // location changes the archivist collects are still dropped.
-    private static ArchiveRequest ArchiveRequestFor(Campaign campaign, string playerInput, string narration)
+    private static ArchiveRequest.Turn ArchiveTurn(Campaign campaign, string playerInput, string narration)
     {
-        return new ArchiveRequest(
-            campaign.Id,
-            campaign.GameSummary,
-            campaign.Characters
-                .Select(c => new CharacterView(c.Id, c.Name, c.Description, c.CurrentHealth, c.IsPlayer, c.Type))
-                .ToList(),
-            campaign.Locations.Select(e => e.Name).ToList(),
-            playerInput,
-            narration);
+        return new ArchiveRequest.Turn(
+            campaign.Id, campaign.GameSummary, Views(campaign), LocationNames(campaign), playerInput, narration);
+    }
+
+    private static ArchiveRequest.Opening ArchiveOpening(Campaign campaign, string narration)
+    {
+        return new ArchiveRequest.Opening(
+            campaign.Id, campaign.GameSummary, Views(campaign), LocationNames(campaign), narration);
+    }
+
+    private static IReadOnlyList<CharacterView> Views(Campaign campaign)
+    {
+        return campaign.Characters.Select(c => c.ToView()).ToList();
+    }
+
+    private static IReadOnlyList<string> LocationNames(Campaign campaign)
+    {
+        return campaign.Locations.Select(l => l.Name).ToList();
     }
 
     private static bool IsGameOver(Campaign campaign)
