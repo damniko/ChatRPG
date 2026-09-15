@@ -4,7 +4,7 @@ using ChatRPG.Agents.ReAct.Exceptions;
 using LangChain.Chains.StackableChains.Agents.Tools;
 using LangChain.Providers;
 
-namespace ChatRPG.Agents.ReAct;
+namespace ChatRPG.Agents.ReAct.Agents;
 
 /// <summary>
 /// Runs one agent through the ReAct loop: render the prompt, ask the model what to do, run the tool

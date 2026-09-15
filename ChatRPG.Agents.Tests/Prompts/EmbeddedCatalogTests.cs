@@ -123,4 +123,19 @@ public class EmbeddedCatalogTests
         Assert.DoesNotContain("{context}", rendered);
         Assert.DoesNotContain("{input}", rendered);
     }
+
+    [Fact]
+    public void SummarizePrompt_RendersWithExactlyTheVariablesTheSummarizerBinds()
+    {
+        var prompt = new PromptTemplate(new EmbeddedInstructionCatalog().Get(InstructionKey.Summarize));
+
+        string rendered = prompt.Render(new Dictionary<string, string>
+        {
+            ["gameSummary"] = "<game summary>",
+            ["new_lines"] = "<new lines>",
+        });
+
+        Assert.DoesNotContain("{gameSummary}", rendered);
+        Assert.DoesNotContain("{new_lines}", rendered);
+    }
 }

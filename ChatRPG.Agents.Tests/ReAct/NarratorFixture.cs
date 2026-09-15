@@ -3,6 +3,7 @@ using ChatRPG.Agents.Llm;
 using ChatRPG.Agents.Prompts;
 using ChatRPG.Agents.Prompts.Catalogs;
 using ChatRPG.Agents.ReAct;
+using ChatRPG.Agents.ReAct.Agents;
 using ChatRPG.Agents.Tools;
 using ChatRPG.Agents.Tools.Catalogs;
 using ChatRPG.Agents.Tools.Helpers;

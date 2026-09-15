@@ -1,4 +1,5 @@
 using ChatRPG.Agents.ReAct;
+using ChatRPG.Agents.ReAct.Agents;
 using ChatRPG.Domain.Entities;
 
 namespace ChatRPG.Agents.Tests.ReAct;

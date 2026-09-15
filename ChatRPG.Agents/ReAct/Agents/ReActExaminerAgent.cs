@@ -5,7 +5,7 @@ using ChatRPG.Agents.Tools;
 using ChatRPG.Application.Abstractions;
 using ChatRPG.Domain.Entities;
 
-namespace ChatRPG.Agents.ReAct;
+namespace ChatRPG.Agents.ReAct.Agents;
 
 /// <summary>
 /// Decides whether the player is allowed to do as they say, before it is narrated.

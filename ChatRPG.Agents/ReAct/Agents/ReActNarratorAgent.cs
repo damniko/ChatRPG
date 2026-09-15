@@ -8,7 +8,7 @@ using ChatRPG.Application.Abstractions;
 using ChatRPG.Application.Gameplay;
 using Microsoft.Extensions.Options;
 
-namespace ChatRPG.Agents.ReAct;
+namespace ChatRPG.Agents.ReAct.Agents;
 
 /// <summary>
 /// Tells the player what happens. It is the only agent that writes for the player to read, so it is

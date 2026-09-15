@@ -1,4 +1,5 @@
 using ChatRPG.Agents.ReAct;
+using ChatRPG.Agents.ReAct.Agents;
 using ChatRPG.Agents.ReAct.Exceptions;
 using LangChain.Chains.StackableChains.Agents.Tools;
 using LangChain.Providers;

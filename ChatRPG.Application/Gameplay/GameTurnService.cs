@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text;
 using ChatRPG.Application.Abstractions;
+using ChatRPG.Application.Mapping;
 using ChatRPG.Domain.Entities;
 
 namespace ChatRPG.Application.Gameplay;
@@ -10,6 +11,7 @@ public class GameTurnService(
     IActionExaminer examiner,
     IGraphNavigator navigator,
     IArchivist archivist,
+    ISummarizer summarizer,
     IUnitOfWork unitOfWork) : IGameTurnService
 {
     public async IAsyncEnumerable<TurnEvent> PlayTurnAsync(
@@ -19,6 +21,7 @@ public class GameTurnService(
     {
         ActionRuling? ruling = null;
         string? graphSummary = null;
+        string? epilogue = null;
 
         if (!campaign.IsOpenWorld)
         {
@@ -49,7 +52,7 @@ public class GameTurnService(
 
         if (IsGameOver(campaign))
         {
-            string epilogue = await narrator.NarrateAsync(
+            epilogue = await narrator.NarrateAsync(
                 new NarrationRequest.Epilogue(campaign, action, narration.ToString()), ct);
             campaign.GameOver = true;
             yield return new TurnEvent.GameEnded(epilogue);
@@ -57,7 +60,17 @@ public class GameTurnService(
 
         yield return new TurnEvent.ArchivingStarted();
         await archivist.ApplyNarrativeChangesAsync(ArchiveRequestFor(campaign, action.Text, narration.ToString()), ct);
-        await archivist.AppendMessagesAsync(campaign, action.Text, narration.ToString(), ruling, null, ct);
+
+        campaign.GameSummary = await summarizer.SummarizeAsync(
+            new SummaryRequest(campaign.GameSummary, action.Text, narration.ToString(), ruling), ct);
+
+        campaign.Messages.Add(new PlayerMessage(campaign, action.Text, ruling));
+        campaign.Messages.Add(new NarrationMessage(campaign, narration.ToString()));
+        if (epilogue is not null)
+        {
+            campaign.Messages.Add(new NarrationMessage(campaign, epilogue));
+        }
+
         await unitOfWork.SaveChangesAsync(ct);
 
         yield return new TurnEvent.CampaignSaved();
@@ -89,8 +102,14 @@ public class GameTurnService(
         yield return new TurnEvent.NarrationCompleted(narration.ToString());
         
         yield return new TurnEvent.ArchivingStarted();
-        await archivist.ApplyNarrativeChangesAsync(ArchiveRequestFor(campaign, openingPrompt, narration.ToString()), ct);
-        await archivist.AppendMessagesAsync(campaign, openingPrompt, narration.ToString(), null, null, ct);
+        // TODO: This is a bit smelly. Why do we need PlayerInput for this request?
+        await archivist.ApplyNarrativeChangesAsync(new ArchiveRequest(campaign.Id, campaign.GameSummary, campaign.Characters.Select(c => c.ToView()).ToList().AsReadOnly(), [], "", openingPrompt), ct);
+
+        campaign.GameSummary = await summarizer.SummarizeAsync(
+            new SummaryRequest(campaign.GameSummary, openingPrompt, narration.ToString(), null), ct);
+
+        campaign.Messages.Add(new NarrationMessage(campaign, narration.ToString()));
+
         await unitOfWork.SaveChangesAsync(ct);
 
         yield return new TurnEvent.CampaignSaved();

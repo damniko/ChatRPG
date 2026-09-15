@@ -9,7 +9,7 @@ using ChatRPG.Domain.Entities;
 using LangChain.DocumentLoaders;
 using Microsoft.Extensions.Options;
 
-namespace ChatRPG.Agents.ReAct;
+namespace ChatRPG.Agents.ReAct.Agents;
 
 // TODO: Handle debug in general (AgentOptions.DebugAgents)
 internal sealed class ReActScribeAgent(
