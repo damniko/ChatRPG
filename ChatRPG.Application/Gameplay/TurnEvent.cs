@@ -1,7 +1,10 @@
+using ChatRPG.Domain.Entities;
+
 namespace ChatRPG.Application.Gameplay;
 
 public abstract record TurnEvent
 {
+    public sealed record RulingIssued(ActionRuling Ruling) : TurnEvent;
     public sealed record InputRejected(string Reasoning) : TurnEvent;
     public sealed record NarrationStarted : TurnEvent;
     public sealed record NarrationChunk(string Text) : TurnEvent;

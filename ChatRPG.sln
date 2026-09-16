@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRPG.Visualization.Graph
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "legacy", "legacy", "{70E5D17B-C46C-43D4-BB70-BB695E00ADFB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatRPG.ConsoleUI", "ChatRPG.ConsoleUI\ChatRPG.ConsoleUI.csproj", "{4254531F-33B0-4F39-AB8C-D0636B58B07A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -129,6 +131,18 @@ Global
 		{4EA5189D-E9C2-43C7-960C-700EBBD1F83D}.Release|x64.Build.0 = Release|Any CPU
 		{4EA5189D-E9C2-43C7-960C-700EBBD1F83D}.Release|x86.ActiveCfg = Release|Any CPU
 		{4EA5189D-E9C2-43C7-960C-700EBBD1F83D}.Release|x86.Build.0 = Release|Any CPU
+		{4254531F-33B0-4F39-AB8C-D0636B58B07A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4254531F-33B0-4F39-AB8C-D0636B58B07A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4254531F-33B0-4F39-AB8C-D0636B58B07A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4254531F-33B0-4F39-AB8C-D0636B58B07A}.Debug|x64.Build.0 = Debug|Any CPU
+		{4254531F-33B0-4F39-AB8C-D0636B58B07A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4254531F-33B0-4F39-AB8C-D0636B58B07A}.Debug|x86.Build.0 = Debug|Any CPU
+		{4254531F-33B0-4F39-AB8C-D0636B58B07A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4254531F-33B0-4F39-AB8C-D0636B58B07A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4254531F-33B0-4F39-AB8C-D0636B58B07A}.Release|x64.ActiveCfg = Release|Any CPU
+		{4254531F-33B0-4F39-AB8C-D0636B58B07A}.Release|x64.Build.0 = Release|Any CPU
+		{4254531F-33B0-4F39-AB8C-D0636B58B07A}.Release|x86.ActiveCfg = Release|Any CPU
+		{4254531F-33B0-4F39-AB8C-D0636B58B07A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

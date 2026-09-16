@@ -26,6 +26,7 @@ public class GameTurnService(
         if (!campaign.IsOpenWorld)
         {
             ruling = await examiner.ExamineAsync(campaign, action.Text, ct);
+            yield return new TurnEvent.RulingIssued(ruling);
             if (!ruling.AttemptProceeds)
             {
                 yield return new TurnEvent.InputRejected(ruling.Reasoning);
